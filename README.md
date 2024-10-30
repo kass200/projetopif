@@ -1,6 +1,6 @@
 # Jogo Pac-Man em Haskell
 
-Este projeto é uma recriação do clássico jogo **Pac-Man**, desenvolvido em **Haskell**. O objetivo é oferecer uma experiência de jogo semelhante ao original, com foco em aprendizado e prática de desenvolvimento funcional.
+Este projeto é desenvolvido por alunos Cesar School, e é pertencente a disciplina de PIF (Programação Imperativa e Funcional). Desenvolveremos uma recriação do clássico jogo **Pac-Man** com personalizações, desenvolvido em **Haskell**.
 
 ## Equipe
 
@@ -35,3 +35,9 @@ O jogo segue a estrutura básica do Pac-Man, com o jogador controlando um person
 │   └── sounds                # Sons e música do jogo
 ├── README.md                 # Documentação do projeto
 └── LICENSE                   # Licença do projeto
+
+
+### Requisitos
+- Haskell 
+- Biblioteca SDL2
+- Joystick (USB)
