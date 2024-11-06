@@ -28,10 +28,10 @@ Este projeto visa explorar a linguagem Haskell, abordando tópicos como:
 
 Por enquanto, temos apenas a movimentação básica, ou seja, a locomoção.
 
-W - Mover para cima
-A - Mover para esquerda
-S - Mover para baixo
-D - Mover para direita
+W - Mover para cima  
+A - Mover para esquerda  
+S - Mover para baixo  
+D - Mover para direita  
 
 ## Estrutura do Projeto
 
