@@ -1,18 +1,43 @@
-/**
- * main.h
- * Created on Aug, 23th 2023
- * Author: Tiago Barros
- * Based on "From C to C++ course - 2002"
-*/
-
 #include <string.h>
 
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
 
+#define ROWS 20
+#define COLS 40
+
 int x = 34, y = 12;
 int incX = 1, incY = 1;
+int score = 0;
+
+int isWin() {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (maze[i][j] == '.') return 0; // Ainda há bolinhas
+        }
+    }
+    return 1; // Todas as bolinhas foram coletadas
+}
+
+char maze[ROWS][COLS] = {
+    "#######################################",
+    "#..............#.....................#",
+    "#.#######.######.###########.#######.#",
+    "#.#...............................#.#",
+    "#.#.########.###########.########.#.#",
+    "#.#........#.#...........#........#.#",
+    "#.#######.#.#.###########.#.#######.#",
+    "#.........#...#...........#.........#",
+    "#######################################"
+};
+
+void drawMaze() {
+    for (int i = 0; i < ROWS; i++) {
+        screenGotoxy(0, i);
+        printf("%s", maze[i]);
+    }
+}
 
 void printHello(int nextX, int nextY)
 {
@@ -44,9 +69,22 @@ void printKey(int ch)
     }
 }
 
+void displayScore() {
+    screenGotoxy(0, ROWS + 1);
+    printf("Score: %d", score);
+}
+
 int main() 
 {
     static int ch = 0;
+
+    drawMaze();
+    displayScore();
+
+    while (1) {
+        drawMaze();
+        displayScore();
+    }
 
     screenInit(1);
     keyboardInit();
@@ -78,6 +116,18 @@ int main()
 
             screenUpdate();
         }
+
+        if (maze[y][x] == '.') {
+            maze[y][x] = ' '; // Remove the bolinha from the maze
+            score++;          // Increment the player's score
+        }
+
+        if (isWin()) {
+            screenGotoxy(0, ROWS + 2);
+            printf("You Win! Final Score: %d", score);
+            break;
+        }
+
     }
 
     keyboardDestroy();
