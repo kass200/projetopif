@@ -11,15 +11,6 @@ int x = 34, y = 12;
 int incX = 1, incY = 1;
 int score = 0;
 
-int isWin() {
-    for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLS; j++) {
-            if (maze[i][j] == '.') return 0; // Ainda há bolinhas
-        }
-    }
-    return 1; // Todas as bolinhas foram coletadas
-}
-
 char maze[ROWS][COLS] = {
     "#######################################",
     "#..............#.....................#",
@@ -31,6 +22,15 @@ char maze[ROWS][COLS] = {
     "#.........#...#...........#.........#",
     "#######################################"
 };
+
+int isWin() {
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            if (maze[i][j] == '.') return 0; // Ainda há bolinhas
+        }
+    }
+    return 1; // Todas as bolinhas foram coletadas
+}
 
 void drawMaze() {
     for (int i = 0; i < ROWS; i++) {
