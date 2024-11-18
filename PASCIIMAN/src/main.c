@@ -119,8 +119,14 @@ void moveGhosts() {
             ghosts[i].dirX = -ghosts[i].dirX;
             ghosts[i].dirY = -ghosts[i].dirY;
         } else {
+            screenGotoxy(ghosts[i].x, ghosts[i].y);
+            printf(" ");
+            
             ghosts[i].x = newX;
             ghosts[i].y = newY;
+
+            screenGotoxy(ghosts[i].x, ghosts[i].y);
+            printf("G");
         }
 
         if (ghosts[i].x == x && ghosts[i].y == y) {
@@ -133,21 +139,29 @@ void movePacman(char direction) {
     int newX = x, newY = y;
 
     switch (direction) {
-        case 'w': newY--; break;
-        case 's': newY++; break;
-        case 'a': newX--; break;
-        case 'd': newX++; break;
+        case 'w': newX--; break;
+        case 's': newX++; break;
+        case 'a': newY--; break;
+        case 'd': newY++; break;
         default: return;
     }
 
     if (maze[newY][newX] != '#') {
-        if (maze[newY][newX] == '.') {
-            score += speedMultiplier;
-        }
-        maze[y][x] = ' ';
+        screenGotoxy(x, y);
+        printf(" ");
+
         x = newX;
         y = newY;
-        maze[y][x] = 'P';
+
+        screenGotoxy(x, y);
+        printf("P");
+
+        if (maze[newY][newX] == '.'){
+            score += speedMultiplier;
+            maze[newY][newX] = ' ';
+            screenGotoxy(0, ROWS);
+            printf("Pontuacao: %d", score);
+        }
     }
 }
 
@@ -180,32 +194,14 @@ void showGameOverScreen(int isWin) {
 }
 
 void drawMaze() {
-    screenClear();
     // Desenha o labirinto
     for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLS; j++) {
-            screenGotoxy(i, j); // Corrige a posição
-            if (maze[i][j] == 'P') {
-                printf("P"); // Representa o Pacman
-            } else if (maze[i][j] == '#') {
-                printf("#"); // Representa paredes
-            } else if (maze[i][j] == '.') {
-                printf("."); // Representa pontos que devem ser coletados
-            } else {
-                printf(" "); // Espaço vazio
-            }
-        }
+        screenGotoxy(0, i);
+        printf("%s", maze[i]);
     }
 
-    // Desenha os fantasmas na tela
-    for (int i = 0; i < numGhosts; i++) {
-        screenGotoxy(ghosts[i].x, ghosts[i].y); // Ajuste de coordenadas para corresponder a (linha, coluna)
-        printf("G"); // Representa fantasmas
-    }
-
-    // Exibe o score e o nível atual no canto superior direito
-    screenGotoxy(ROWS + 1, 0);
-    printf("Score: %d  Nível: %d", score, currentLevel + 1);
+    screenGotoxy(0, ROWS);
+    printf("Pontuacao: %d", score);
 }
 
 
@@ -216,9 +212,9 @@ int main() {
 
     loadLevel();
     initGhosts();
+    drawMaze();
 
     while (1) {
-        drawMaze();
 
         if (keyhit()) {
             ch = readch();
