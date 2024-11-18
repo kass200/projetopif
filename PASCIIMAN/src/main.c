@@ -1,138 +1,192 @@
 #include <string.h>
-
+#include <stdlib.h>
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
 
 #define ROWS 20
 #define COLS 40
+#define MAX_LEVELS 5
+#define MAX_GHOSTS 5
 
-int x = 34, y = 12;
-int incX = 1, incY = 1;
+int x = 1, y = 1; // Posição inicial do Pacman
 int score = 0;
+int currentLevel = 0;
+int numGhosts = 2;
+int speedMultiplier = 1; // Multiplicador de velocidade
 
-char maze[ROWS][COLS] = {
-    "#######################################",
-    "#..............#.....................#",
-    "#.#######.######.###########.#######.#",
-    "#.#...............................#.#",
-    "#.#.########.###########.########.#.#",
-    "#.#........#.#...........#........#.#",
-    "#.#######.#.#.###########.#.#######.#",
-    "#.........#...#...........#.........#",
-    "#######################################"
+typedef struct {
+    int x, y;
+    int dirX, dirY;
+} Ghost;
+
+Ghost ghosts[MAX_GHOSTS];
+
+char levels[MAX_LEVELS][ROWS][COLS] = {
+    { "#######################################", 
+      "#P.............#.....................#", 
+      "#.#######.######.###########.#######.#",
+      "#.#...............................#.#", 
+      "#.#.########.###########.########.#.#", 
+      "#.#........#.#...........#........#.#",
+      "#.#######.#.#.###########.#.#######.#", 
+      "#.........#...#...........#.........#", 
+      "#######################################" 
+    },
+
+    { "#######################################", 
+      "#P..#..............#.................#", 
+      "#.#.#.#######.###########.#######.#.#",
+      "#.#.#...........................#.#.#", 
+      "#.#.########.###########.#######.#.#", 
+      "#.#........#.#...........#.......#.#",
+      "#.#######.#.#.###########.#######.#", 
+      "#.........#...#...........#.......#", 
+      "#######################################" },
+
+    { "#######################################", 
+      "#P.....#.............................#", 
+      "#.#####.######.###########.#######.#.#",
+      "#.#...............................#.#", 
+      "#.#.########.#######.#######.#####.#", 
+      "#.#........#.#.........#..........#.#",
+      "#.#######.#.#.###########.#######.#", 
+      "#.........#...#...........#.......#", 
+      "#######################################"
+    },
+
+    { "#######################################", 
+      "#P...................................#", 
+      "#.#######.######.###########.#######.#",
+      "#.#.............#.................#.#", 
+      "#.#.############.###############.#.#", 
+      "#.#..............#...............#.#",
+      "#.###########.#.###############.#.#", 
+      "#.............#.................#..#", 
+      "#######################################" 
+    },
+
+    { "#######################################", 
+      "#P.....##########...##########........#", 
+      "#.######.............#........######.#",
+      "#.#######.###########.###########.###", 
+      "#........#.................#........#", 
+      "#.#######.###############.###########",
+      "#.......................#............", 
+      "#######################################" 
+    }
 };
+
+void resetLevel() {
+    x = 1; y = 1;
+    initGhosts();
+}
+
+void loadLevel() {
+    memcpy(maze, levels[currentLevel], sizeof(levels[currentLevel]));
+    numGhosts = 2 + currentLevel;
+    speedMultiplier = currentLevel + 1;
+    timerInit(50 / speedMultiplier);
+}
+
+void initGhosts() {
+    for (int i = 0; i < numGhosts; i++) {
+        ghosts[i] = (Ghost){5 + i, 5, 1, 0};
+    }
+}
 
 int isWin() {
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLS; j++) {
-            if (maze[i][j] == '.') return 0; // Ainda há bolinhas
+            if (maze[i][j] == '.') return 0;
         }
     }
-    return 1; // Todas as bolinhas foram coletadas
+    return 1;
 }
 
-void drawMaze() {
-    for (int i = 0; i < ROWS; i++) {
-        screenGotoxy(0, i);
-        printf("%s", maze[i]);
+void moveGhosts() {
+    for (int i = 0; i < numGhosts; i++) {
+        int newX = ghosts[i].x + ghosts[i].dirX;
+        int newY = ghosts[i].y + ghosts[i].dirY;
+
+        if (maze[newY][newX] == '#') {
+            ghosts[i].dirX = -ghosts[i].dirX;
+            ghosts[i].dirY = -ghosts[i].dirY;
+        } else {
+            ghosts[i].x = newX;
+            ghosts[i].y = newY;
+        }
+
+        if (ghosts[i].x == x && ghosts[i].y == y) {
+            showGameOverScreen(0);
+        }
     }
 }
 
-void printHello(int nextX, int nextY)
-{
-    screenSetColor(CYAN, DARKGRAY);
-    screenGotoxy(x, y);
-    printf("           ");
-    x = nextX;
-    y = nextY;
-    screenGotoxy(x, y);
-    printf("Hello World");
-}
+void movePacman(char direction) {
+    int newX = x, newY = y;
 
-void printKey(int ch)
-{
-    screenSetColor(YELLOW, DARKGRAY);
-    screenGotoxy(35, 22);
-    printf("Key code :");
+    switch (direction) {
+        case 'w': newY--; break;
+        case 's': newY++; break;
+        case 'a': newX--; break;
+        case 'd': newX++; break;
+        default: return;
+    }
 
-    screenGotoxy(34, 23);
-    printf("            ");
-    
-    if (ch == 27) screenGotoxy(36, 23);
-    else screenGotoxy(39, 23);
-
-    printf("%d ", ch);
-    while (keyhit())
-    {
-        printf("%d ", readch());
+    if (maze[newY][newX] != '#') {
+        if (maze[newY][newX] == '.') {
+            score += speedMultiplier;
+        }
+        maze[y][x] = ' ';
+        x = newX;
+        y = newY;
+        maze[y][x] = 'P';
     }
 }
 
-void displayScore() {
-    screenGotoxy(0, ROWS + 1);
-    printf("Score: %d", score);
+void showLevelTransition() {
+    screenClear();
+    screenGotoxy(10, 5);
+    printf("Nível %d Concluído!", currentLevel);
+    screenGotoxy(10, 7);
+    printf("Prepare-se para o próximo nível...");
+    getchar();
 }
 
-int main() 
-{
-    static int ch = 0;
+int main() {
+    int ch = 0;
+    screenInit(1);
+    keyboardInit();
 
-    drawMaze();
-    displayScore();
+    loadLevel();
+    initGhosts();
 
     while (1) {
         drawMaze();
-        displayScore();
-    }
 
-    screenInit(1);
-    keyboardInit();
-    timerInit(50);
-
-    printHello(x, y);
-    screenUpdate();
-
-    while (ch != 10) //enter
-    {
-        // Handle user input
-        if (keyhit()) 
-        {
+        if (keyhit()) {
             ch = readch();
-            printKey(ch);
-            screenUpdate();
+            movePacman(ch);
         }
-
-        // Update game state (move elements, verify collision, etc)
-        if (timerTimeOver() == 1)
-        {
-            int newX = x + incX;
-            if (newX >= (MAXX -strlen("Hello World") -1) || newX <= MINX+1) incX = -incX;
-            int newY = y + incY;
-            if (newY >= MAXY-1 || newY <= MINY+1) incY = -incY;
-
-            printKey(ch);
-            printHello(newX, newY);
-
-            screenUpdate();
-        }
-
-        if (maze[y][x] == '.') {
-            maze[y][x] = ' '; // Remove the bolinha from the maze
-            score++;          // Increment the player's score
-        }
+        moveGhosts();
 
         if (isWin()) {
-            screenGotoxy(0, ROWS + 2);
-            printf("You Win! Final Score: %d", score);
-            break;
+            showLevelTransition();
+            currentLevel++;
+            if (currentLevel >= MAX_LEVELS) {
+                showGameOverScreen(1);
+                break;
+            } else {
+                loadLevel();
+                initGhosts();
+            }
         }
 
+        screenUpdate();
     }
 
     keyboardDestroy();
     screenDestroy();
-    timerDestroy();
-
     return 0;
 }
