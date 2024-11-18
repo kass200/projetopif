@@ -9,6 +9,10 @@
 #define MAX_LEVELS 5
 #define MAX_GHOSTS 5
 
+// Declarações de funções para evitar implicit declaration           // Declaração para a função initGhosts
+void showGameOverScreen(int); // Declaração para showGameOverScreen
+void drawMaze();              // Declaração para drawMaze
+
 int x = 1, y = 1; // Posição inicial do Pacman
 int score = 0;
 int currentLevel = 0;
@@ -77,6 +81,14 @@ char levels[MAX_LEVELS][ROWS][COLS] = {
     }
 };
 
+char maze[ROWS][COLS];
+
+void initGhosts() {
+    for (int i = 0; i < numGhosts; i++) {
+        ghosts[i] = (Ghost){5 + i, 5, 1, 0};
+    }
+}
+
 void resetLevel() {
     x = 1; y = 1;
     initGhosts();
@@ -87,12 +99,6 @@ void loadLevel() {
     numGhosts = 2 + currentLevel;
     speedMultiplier = currentLevel + 1;
     timerInit(50 / speedMultiplier);
-}
-
-void initGhosts() {
-    for (int i = 0; i < numGhosts; i++) {
-        ghosts[i] = (Ghost){5 + i, 5, 1, 0};
-    }
 }
 
 int isWin() {
@@ -153,6 +159,55 @@ void showLevelTransition() {
     printf("Prepare-se para o próximo nível...");
     getchar();
 }
+
+void showGameOverScreen(int isWin) {
+    screenClear();
+    if (isWin) {
+        printf("\n\n");
+        printf("******************************************\n");
+        printf("*              PARABÉNS!                *\n");
+        printf("*       Você venceu todos os níveis!    *\n");
+        printf("******************************************\n\n");
+    } else {
+        printf("\n\n");
+        printf("******************************************\n");
+        printf("*               GAME OVER               *\n");
+        printf("*      Você foi pego por um fantasma!   *\n");
+        printf("******************************************\n\n");
+    }
+    printf("Pressione qualquer tecla para sair...");
+    getchar(); // Espera o usuário pressionar uma tecla
+}
+
+void drawMaze() {
+    screenClear();
+    // Desenha o labirinto
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            screenGotoxy(i, j); // Corrige a posição
+            if (maze[i][j] == 'P') {
+                printf("P"); // Representa o Pacman
+            } else if (maze[i][j] == '#') {
+                printf("#"); // Representa paredes
+            } else if (maze[i][j] == '.') {
+                printf("."); // Representa pontos que devem ser coletados
+            } else {
+                printf(" "); // Espaço vazio
+            }
+        }
+    }
+
+    // Desenha os fantasmas na tela
+    for (int i = 0; i < numGhosts; i++) {
+        screenGotoxy(ghosts[i].x, ghosts[i].y); // Ajuste de coordenadas para corresponder a (linha, coluna)
+        printf("G"); // Representa fantasmas
+    }
+
+    // Exibe o score e o nível atual no canto superior direito
+    screenGotoxy(ROWS + 1, 0);
+    printf("Score: %d  Nível: %d", score, currentLevel + 1);
+}
+
 
 int main() {
     int ch = 0;
