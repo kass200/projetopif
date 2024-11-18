@@ -95,6 +95,16 @@ char levels[MAX_LEVELS][ROWS][COLS] = {
     }
 };
 
+// Função para reinicializar o nível
+void resetLevel() {
+    x = 1; y = 1;
+    score = 0;
+    loadLevel();
+    initGhosts();
+    drawMaze();
+    drawScore();
+}
+
 // Inicializa os fantasmas
 void initGhosts() {
     srand(time(0));
@@ -155,10 +165,14 @@ void showGameOverScreen(int won) {
         printf("Game Over! Você foi pego por um fantasma!\n");
     }
     printf("Pontuação final: %d\n", score);
-    printf("Pressione qualquer tecla para sair...");
+    printf("Pressione 'R' para reiniciar ou qualquer outra tecla para sair...");
     while (!keyhit());
-    readch();
-    exit(0);
+    char choice = readch();
+    if (choice == 'r' || choice == 'R') {
+        resetLevel();
+    } else {
+        exit(0);
+    }
 }
 
 void movePacman(char direction) {
