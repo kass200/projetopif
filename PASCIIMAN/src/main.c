@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
@@ -9,15 +10,23 @@
 #define MAX_LEVELS 5
 #define MAX_GHOSTS 5
 
-// Declarações de funções para evitar implicit declaration           // Declaração para a função initGhosts
-void showGameOverScreen(int); // Declaração para showGameOverScreen
-void drawMaze();              // Declaração para drawMaze
+// Funções declaradas
+void showGameOverScreen(int);
+void showStartScreen();
+void drawMaze();
+void drawScore();
+void initGhosts();
+void resetLevel();
+void loadLevel();
+int isWin();
+void movePacman(char);
 
-int x = 1, y = 1; // Posição inicial do Pacman
+// Variáveis globais
+int x = 1, y = 1;
 int score = 0;
 int currentLevel = 0;
 int numGhosts = 2;
-int speedMultiplier = 1; // Multiplicador de velocidade
+int speedMultiplier = 1;
 
 typedef struct {
     int x, y;
@@ -25,73 +34,78 @@ typedef struct {
 } Ghost;
 
 Ghost ghosts[MAX_GHOSTS];
+char maze[ROWS][COLS];
 
+// Definição dos cinco labirintos
 char levels[MAX_LEVELS][ROWS][COLS] = {
-    { "#######################################", 
-      "#P.............#.....................#", 
-      "#.#######.######.###########.#######.#",
-      "#.#...............................#.#", 
-      "#.#.########.###########.########.#.#", 
-      "#.#........#.#...........#........#.#",
-      "#.#######.#.#.###########.#.#######.#", 
-      "#.........#...#...........#.........#", 
-      "#######################################" 
+    { // Nível 1 (Fácil)
+        "#######################################",
+        "#P.............#.....................#",
+        "#.#######.######.###########.#######.#",
+        "#.#...............................#.#",
+        "#.#.########.###########.########.#.#",
+        "#.#........#.#...........#........#.#",
+        "#.#######.#.#.###########.#.#######.#",
+        "#.........#...#...........#.........#",
+        "#######################################"
     },
-
-    { "#######################################", 
-      "#P..#..............#.................#", 
-      "#.#.#.#######.###########.#######.#.#",
-      "#.#.#...........................#.#.#", 
-      "#.#.########.###########.#######.#.#", 
-      "#.#........#.#...........#.......#.#",
-      "#.#######.#.#.###########.#######.#", 
-      "#.........#...#...........#.......#", 
-      "#######################################" },
-
-    { "#######################################", 
-      "#P.....#.............................#", 
-      "#.#####.######.###########.#######.#.#",
-      "#.#...............................#.#", 
-      "#.#.########.#######.#######.#####.#", 
-      "#.#........#.#.........#..........#.#",
-      "#.#######.#.#.###########.#######.#", 
-      "#.........#...#...........#.......#", 
-      "#######################################"
+    { // Nível 2 (Moderado)
+        "#######################################",
+        "#P..#..............#.................#",
+        "#.#.#.#######.###########.#######.#.#",
+        "#.#.#......#.............#.......#.#.#",
+        "#.#.########.###########.#######.#.#",
+        "#.#........#.#...........#.......#.#",
+        "#.#######.#.#.###########.#######.#",
+        "#.........#...#...........#.......#",
+        "#######################################"
     },
-
-    { "#######################################", 
-      "#P...................................#", 
-      "#.#######.######.###########.#######.#",
-      "#.#.............#.................#.#", 
-      "#.#.############.###############.#.#", 
-      "#.#..............#...............#.#",
-      "#.###########.#.###############.#.#", 
-      "#.............#.................#..#", 
-      "#######################################" 
+    { // Nível 3 (Desafiador)
+        "#######################################",
+        "#P.....#.............................#",
+        "#.#####.######.###########.#######.#.#",
+        "#.#...............................#.#",
+        "#.#.########.#######.#######.#####.#",
+        "#.#........#.#.....#...#..........#.#",
+        "#.#######.#.#.###.#####.#######.###.#",
+        "#.........#...#...........#.......#.#",
+        "#######################################"
     },
-
-    { "#######################################", 
-      "#P.....##########...##########........#", 
-      "#.######.............#........######.#",
-      "#.#######.###########.###########.###", 
-      "#........#.................#........#", 
-      "#.#######.###############.###########",
-      "#.......................#............", 
-      "#######################################" 
+    { // Nível 4 (Difícil)
+        "#######################################",
+        "#P.............................#.....#",
+        "#.#######.######.###########.#######.#",
+        "#.#......#.............#...........#.#",
+        "#.#.#############.###############.#.#",
+        "#.#....#..........#...............#.#",
+        "#.###########.#.#######.#########.#.#",
+        "#.............#.....#.............#..#",
+        "#######################################"
+    },
+    { // Nível 5 (Muito Difícil)
+        "#######################################",
+        "#P.....##########...##########........#",
+        "#.######....#............#....######.#",
+        "#.#######.##.###########.###.#######.#",
+        "#.....#...#.................#........#",
+        "#.###.#.#############.####.###########",
+        "#.#.....#.............#..............#",
+        "#.#######.######################.###.#",
+        "#######################################"
     }
 };
 
-char maze[ROWS][COLS];
-
+// Inicializa os fantasmas
 void initGhosts() {
+    srand(time(0));
     for (int i = 0; i < numGhosts; i++) {
-        ghosts[i] = (Ghost){5 + i, 5, 1, 0};
+        int posX, posY;
+        do {
+            posX = rand() % (COLS - 2) + 1;
+            posY = rand() % (ROWS - 2) + 1;
+        } while (maze[posY][posX] == '#');
+        ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
     }
-}
-
-void resetLevel() {
-    x = 1; y = 1;
-    initGhosts();
 }
 
 void loadLevel() {
@@ -110,133 +124,95 @@ int isWin() {
     return 1;
 }
 
-void moveGhosts() {
-    for (int i = 0; i < numGhosts; i++) {
-        int newX = ghosts[i].x + ghosts[i].dirX;
-        int newY = ghosts[i].y + ghosts[i].dirY;
+void drawScore() {
+    screenGotoxy(0, ROWS);
+    printf("Pontuação: %d   ", score);
+}
 
-        if (maze[newY][newX] == '#') {
-            ghosts[i].dirX = -ghosts[i].dirX;
-            ghosts[i].dirY = -ghosts[i].dirY;
-        } else {
-            screenGotoxy(ghosts[i].x, ghosts[i].y);
-            printf(" ");
-            
-            ghosts[i].x = newX;
-            ghosts[i].y = newY;
-
-            screenGotoxy(ghosts[i].x, ghosts[i].y);
-            printf("G");
-        }
-
-        if (ghosts[i].x == x && ghosts[i].y == y) {
-            showGameOverScreen(0);
-        }
+void drawMaze() {
+    for (int i = 0; i < ROWS; i++) {
+        screenGotoxy(0, i);
+        printf("%s", maze[i]);
     }
+    drawScore();
+}
+
+void showStartScreen() {
+    screenClear();
+    screenGotoxy(10, 5);
+    printf("===== PASCIIMAN =====");
+    screenGotoxy(10, 7);
+    printf("Pressione qualquer tecla para começar...");
+    while (!keyhit());
+    readch();
+}
+
+void showGameOverScreen(int won) {
+    screenClear();
+    if (won) {
+        printf("Parabéns! Você venceu todos os níveis!\n");
+    } else {
+        printf("Game Over! Você foi pego por um fantasma!\n");
+    }
+    printf("Pontuação final: %d\n", score);
+    printf("Pressione qualquer tecla para sair...");
+    while (!keyhit());
+    readch();
+    exit(0);
 }
 
 void movePacman(char direction) {
     int newX = x, newY = y;
 
     switch (direction) {
-        case 'w': newX--; break;
-        case 's': newX++; break;
-        case 'a': newY--; break;
-        case 'd': newY++; break;
+        case 'w': newY--; break;
+        case 's': newY++; break;
+        case 'a': newX--; break;
+        case 'd': newX++; break;
         default: return;
     }
 
-    if (maze[newY][newX] != '#') {
+    if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
         screenGotoxy(x, y);
         printf(" ");
-
         x = newX;
         y = newY;
-
         screenGotoxy(x, y);
         printf("P");
 
-        if (maze[newY][newX] == '.'){
+        if (maze[newY][newX] == '.') {
             score += speedMultiplier;
             maze[newY][newX] = ' ';
-            screenGotoxy(0, ROWS);
-            printf("Pontuacao: %d", score);
+            drawScore();
         }
     }
 }
-
-void showLevelTransition() {
-    screenClear();
-    screenGotoxy(10, 5);
-    printf("Nível %d Concluído!", currentLevel);
-    screenGotoxy(10, 7);
-    printf("Prepare-se para o próximo nível...");
-    getchar();
-}
-
-void showGameOverScreen(int isWin) {
-    screenClear();
-    if (isWin) {
-        printf("\n\n");
-        printf("******************************************\n");
-        printf("*              PARABÉNS!                *\n");
-        printf("*       Você venceu todos os níveis!    *\n");
-        printf("******************************************\n\n");
-    } else {
-        printf("\n\n");
-        printf("******************************************\n");
-        printf("*               GAME OVER               *\n");
-        printf("*      Você foi pego por um fantasma!   *\n");
-        printf("******************************************\n\n");
-    }
-    printf("Pressione qualquer tecla para sair...");
-    getchar(); // Espera o usuário pressionar uma tecla
-}
-
-void drawMaze() {
-    // Desenha o labirinto
-    for (int i = 0; i < ROWS; i++) {
-        screenGotoxy(0, i);
-        printf("%s", maze[i]);
-    }
-
-    screenGotoxy(0, ROWS);
-    printf("Pontuacao: %d", score);
-}
-
 
 int main() {
     int ch = 0;
     screenInit(1);
     keyboardInit();
 
+    showStartScreen();
     loadLevel();
     initGhosts();
     drawMaze();
 
     while (1) {
-
         if (keyhit()) {
             ch = readch();
             movePacman(ch);
         }
-        moveGhosts();
 
         if (isWin()) {
-            showLevelTransition();
-            currentLevel++;
-            if (currentLevel >= MAX_LEVELS) {
-                showGameOverScreen(1);
-                break;
-            } else {
-                loadLevel();
-                initGhosts();
-            }
+            showGameOverScreen(1);
+            break;
         }
 
         screenUpdate();
     }
 
+    showGameOverScreen(0);
     keyboardDestroy();
     screenDestroy();
     return 0;
