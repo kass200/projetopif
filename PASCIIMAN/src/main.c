@@ -150,16 +150,28 @@ void drawScore() {
     screenGotoxy(offsetX, offsetY + ROWS + 1);
     printf("Pontuação: %d   ", score);
 }
-
 // Desenha o labirinto na tela
 void drawMaze() {
     for (int i = 0; i < ROWS; i++) {
         screenGotoxy(offsetX, offsetY + i);
-        printf("%s", maze[i]);
+        for (int j = 0; j < COLS; j++) {
+            if (maze[i][j] == '#') {
+                printf("\033[1;34m#\033[0m"); // Azul brilhante para paredes
+            } else if (maze[i][j] == '.') {
+                printf("\033[1;34m.\033[0m"); // Azul brilhante para pontos
+            } else if (maze[i][j] == 'P') {
+                printf("\033[1;33mP\033[0m"); // Amarelo brilhante para Pac-Man
+            } else if (maze[i][j] == '_') {
+                printf("\033[1;34m_\033[0m"); // Azul brilhante para o limite inferior
+            } else if (maze[i][j] == '|') {
+                printf("\033[1;34m|\033[0m"); // Azul brilhante para bordas verticais
+            } else {
+                printf(" "); // Espaço vazio
+            }
+        }
     }
     drawScore();
 }
-
 // Tela inicial
 void showStartScreen() {
     screenClear();
@@ -211,10 +223,12 @@ void movePacman(char direction) {
         default: return;
     }
 
-    if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
+     if (newX >= 1 && newX < COLS - 1 && newY >= 1 && newY < ROWS - 1 && maze[newY][newX] != '#' || maze[newY][newX] != '|' || maze[newY][newX] != '_') {
         // Apagar posição antiga
         screenGotoxy(offsetX + x, offsetY + y);
         printf(" ");
+
+        // Atualiza as coordenadas do Pac-Man
         x = newX;
         y = newY;
         // Desenhar na nova posição
