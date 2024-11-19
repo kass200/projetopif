@@ -46,7 +46,7 @@ char maze[ROWS][COLS];
 // Labirinto
 char levels[MAX_LEVELS][ROWS][COLS] = {
     { 
-      "___________________________________",
+      "____________________________________",
      "|###################################|",
      "|P.............#....................|",
      "|.#######.######.###########.######.|",
@@ -263,11 +263,6 @@ void movePacman(char direction) {
             screenGotoxy(offsetX + x, offsetY + y);
             printf(" ");  // Deixa a posição em branco
 
-            if (maze[newY][newX] == '.') {
-                score++;  // Coleta o ponto
-                maze[newY][newX] = ' ';  // Apaga o ponto do labirinto
-            }
-
             // Atualiza a posição do Pac-Man
             x = newX;
             y = newY;
@@ -279,37 +274,12 @@ void movePacman(char direction) {
             if (maze[newY][newX] == '.') {
                 score += 1;
                 maze[newY][newX] = ' ';
-                drawScore();
             }
+
+            drawScore();
         }
 
     }
-}
-
-void respawnPontos() {
-    static clock_t lastRespawnTime = 0;
-    clock_t currentTime = clock();
-    if (((currentTime - lastRespawnTime) / CLOCKS_PER_SEC) < 3) return;
-    lastRespawnTime = currentTime;
-
-    int posX, posY;
-    int isNearGhost = 0;
-    
-    do {
-      posX = rand() % (COLS - 2) + 1;
-      posY = rand() % (ROWS - 2) + 1;
-
-       for (int i = 0; i < numGhosts; i++) {
-         if (ghosts[i].x == posX && ghosts[i].y == posY) {
-             isNearGhost = 1;
-             break;
-            }
-        }
-    } while (maze[posY][posX] != ' ' || (abs(posX - x) < 3 && abs(posY - y) < 3) || isNearGhost);
-
-    maze[posY][posX] = '.';
-    screenGotoxy(offsetX + posX, offsetY + posY);
-    printf("\033[1;34m.\033[0m");
 }
 
 // Função para verificar colisão entre Pac-Man e os fantasmas
@@ -347,9 +317,6 @@ int main() {
 
     // Atualiza fantasmas
     moveGhosts();
-
-    // Respawna pontos após um intervalo
-    respawnPontos();
 
     // Verifica condições de vitória ou derrota
     if (isWin()) {
