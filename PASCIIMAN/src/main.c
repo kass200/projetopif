@@ -99,18 +99,23 @@ void moveGhosts() {
         int newX = ghosts[i].x + ghosts[i].dirX;
         int newY = ghosts[i].y + ghosts[i].dirY;
 
-        if (maze[newY][newX] == '#') {
+        // Verificar se a nova posição está dentro dos limites
+        if (newX < 0 || newX >= COLS || newY < 0 || newY >= ROWS || maze[newY][newX] == '#') {
             ghosts[i].dirX = -ghosts[i].dirX;
             ghosts[i].dirY = -ghosts[i].dirY;
         } else {
+            // Apagar a posição antiga
             screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
             printf(" ");
+
+            // Atualizar a posição
             ghosts[i].x = newX;
             ghosts[i].y = newY;
-        }
 
-        if (ghosts[i].x == x && ghosts[i].y == y) {
-            showGameOverScreen(0);
+            // Verificar colisão com Pac-Man
+            if (ghosts[i].x == x && ghosts[i].y == y) {
+                showGameOverScreen(0);
+            }
         }
     }
     drawGhosts();
@@ -166,7 +171,7 @@ void showStartScreen() {
     printf("===== PASCIIMAN =====");
     screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
     printf("Pressione qualquer tecla para começar...");
-    fflush(stdout); 
+    fflush(stdout);
     while (!keyhit());
     readch();
     screenClear();
