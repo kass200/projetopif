@@ -279,11 +279,12 @@ void respawnPontos() {
     lastRespawnTime = currentTime;
 
     int posX, posY;
+    int isNearGhost = 0;
+    
     do {
       posX = rand() % (COLS - 2) + 1;
       posY = rand() % (ROWS - 2) + 1;
 
-      int isNearGhost = 0;
        for (int i = 0; i < numGhosts; i++) {
          if (ghosts[i].x == posX && ghosts[i].y == posY) {
              isNearGhost = 1;
@@ -324,28 +325,33 @@ int main() {
     drawMaze();
 
    while (1) {
-     if (keyhit()) {
-         ch = readch();
-         movePacman(ch);
-        }
-
-      moveGhosts();
-      respawnPontos();
-
-      if (isWin()) {
-         showGameOverScreen(1);
-         break;
-        }
-
-      screenUpdate();
+    // Verifica entrada do teclado
+    if (keyhit()) {
+        ch = readch();
+        movePacman(ch); // Move Pac-Man
     }
 
-    // Tela de fim de jogo
-    showGameOverScreen(0);
+    // Atualiza fantasmas
+    moveGhosts();
 
-    // Limpar recursos
-    keyboardDestroy();
-    screenDestroy();
+    // Respawna pontos após um intervalo
+    respawnPontos();
 
-    return 0;
+    // Verifica condições de vitória ou derrota
+    if (isWin()) {
+        showGameOverScreen(1); // Venceu
+        break;
+    }
+
+    if (checkCollision()) {
+        showGameOverScreen(0); // Derrota
+        break;
+    }
+
+    // Atualiza a tela
+    screenUpdate();
+}
+
+
+       
 }
