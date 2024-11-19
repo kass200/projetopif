@@ -78,9 +78,11 @@ void initGhosts() {
     for (int i = 0; i < numGhosts; i++) {
         int posX, posY;
         do {
-            posX = rand() % (COLS - 2) + 1;
-            posY = rand() % (ROWS - 2) + 1;
-        } while (maze[posY][posX] == '#' || maze[posY][posX] == '|' || maze[posY][posX] == '_');
+            posX = rand() % COLS; // Gera posições entre 0 e COLS-1
+            posY = rand() % ROWS; // Gera posições entre 0 e ROWS-1
+        } while (maze[posY][posX] != '.' && maze[posY][posX] != ' '); 
+        // Garante que o fantasma só seja posicionado em espaços livres ('.' ou ' ')
+
         ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
 
         // Desenhar o fantasma com cor vermelha
