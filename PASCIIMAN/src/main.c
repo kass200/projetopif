@@ -80,8 +80,12 @@ void initGhosts() {
         do {
             posX = rand() % (COLS - 2) + 1;
             posY = rand() % (ROWS - 2) + 1;
-        } while (maze[posY][posX] != '.');
-        ghosts[i] = (Ghost){posX, posY, (rand() % 3) - 1, (rand() % 3) - 1};
+        } while (maze[posY][posX] == '#' || maze[posY][posX] == '|' || maze[posY][posX] == '_');
+        ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
+
+        // Desenhar o fantasma com cor vermelha
+        screenGotoxy(offsetX + posX, offsetY + posY);
+        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
     }
 }
 
@@ -94,32 +98,54 @@ void drawGhosts() {
 }
 
 void moveGhosts() {
-    static clock_t lastMoveTime = 0;
-    clock_t currentTime = clock();
-    float delay = 0.5 - (score / 100.0);
-    if (delay < 0.2) delay = 0.2;
-
-    if (((currentTime - lastMoveTime) / CLOCKS_PER_SEC) < delay) return;
-    lastMoveTime = currentTime;
+    ghostMoveCounter++;
+    if (ghostMoveCounter % 170000 != 0) return; // Reduz a frequência de movimento dos fantasmas
 
     for (int i = 0; i < numGhosts; i++) {
         int newX = ghosts[i].x + ghosts[i].dirX;
         int newY = ghosts[i].y + ghosts[i].dirY;
 
-        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#' && maze[newY][newX] != '|') {
+        // Verificar se a nova posição é válida (não é uma parede e está dentro dos limites)
+        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
+            // Apagar a posição antiga
             screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
             printf(" ");
+
+            // Atualizar a posição
             ghosts[i].x = newX;
             ghosts[i].y = newY;
 
+            // Verificar colisão com Pac-Man
             if (ghosts[i].x == x && ghosts[i].y == y) {
                 showGameOverScreen(0);
             }
         } else {
-            ghosts[i].dirX = (rand() % 3) - 1;
-            ghosts[i].dirY = (rand() % 3) - 1;
+            // Se a direção está bloqueada, escolher uma nova direção aleatória válida
+            int directions[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}; // Direções possíveis (direita, esquerda, baixo, cima)
+            int validDirectionFound = 0;
+
+            for (int attempt = 0; attempt < 4; attempt++) {
+                int randIndex = rand() % 4; // Escolher uma direção aleatória
+                int testX = ghosts[i].x + directions[randIndex][0];
+                int testY = ghosts[i].y + directions[randIndex][1];
+
+                if (testX >= 0 && testX < COLS && testY >= 0 && testY < ROWS && maze[testY][testX] != '#') {
+                    ghosts[i].dirX = directions[randIndex][0];
+                    ghosts[i].dirY = directions[randIndex][1];
+                    validDirectionFound = 1;
+                    break;
+                }
+            }
+
+            // Se nenhuma direção válida foi encontrada, inverter a direção atual
+            if (!validDirectionFound) {
+                ghosts[i].dirX = -ghosts[i].dirX;
+                ghosts[i].dirY = -ghosts[i].dirY;
+            }
         }
     }
+
+    // Redesenhar os fantasmas em suas novas posições
     drawGhosts();
 }
 
