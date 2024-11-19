@@ -34,6 +34,7 @@ int speedMultiplier = 1;
 int offsetX = 0; // Deslocamento horizontal para centralizar o labirinto
 int offsetY = 0; // Deslocamento vertical para centralizar o labirinto
 int ghostMoveCounter = 0;
+int highScore = 0;
 typedef struct {
     int x, y;
     int dirX, dirY;
@@ -95,9 +96,11 @@ void drawGhosts() {
 void moveGhosts() {
     static clock_t lastMoveTime = 0;
     clock_t currentTime = clock();
+    float delay = 0.5 - (score / 100.0); // Reduz o tempo de espera à medida que a pontuação aumenta
+    if (delay < 0.2) delay = 0.2;       // Define um limite mínimo
 
-    // Atualizar fantasmas a cada 500ms
-    if (((currentTime - lastMoveTime) / CLOCKS_PER_SEC) < 0.5) return;
+    // Atualizar fantasmas com base no delay calculado
+    if (((currentTime - lastMoveTime) / CLOCKS_PER_SEC) < delay) return;
     lastMoveTime = currentTime;
 
     for (int i = 0; i < numGhosts; i++) {
@@ -105,38 +108,18 @@ void moveGhosts() {
         int newY = ghosts[i].y + ghosts[i].dirY;
 
         // Verificar se a nova posição é válida
-        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] == '.') {
-            // Apagar posição antiga
+        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#' && maze[newY][newX] != '|') {
             screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-            printf(".");
-
-            // Atualizar posição
+            printf(" ");
             ghosts[i].x = newX;
             ghosts[i].y = newY;
 
-            // Colisão com Pac-Man
             if (ghosts[i].x == x && ghosts[i].y == y) {
                 showGameOverScreen(0);
             }
         } else {
-            // Selecionar nova direção
-            int directions[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-            int validDir = 0;
-            for (int d = 0; d < 4; d++) {
-                int testX = ghosts[i].x + directions[d][0];
-                int testY = ghosts[i].y + directions[d][1];
-                if (testX >= 0 && testX < COLS && testY >= 0 && testY < ROWS && maze[testY][testX] == '.') {
-                    ghosts[i].dirX = directions[d][0];
-                    ghosts[i].dirY = directions[d][1];
-                    validDir = 1;
-                    break;
-                }
-            }
-            if (!validDir) {
-                // Inverter direção se nenhuma direção válida for encontrada
-                ghosts[i].dirX *= -1;
-                ghosts[i].dirY *= -1;
-            }
+            ghosts[i].dirX = rand() % 3 - 1; // Escolher nova direção
+            ghosts[i].dirY = rand() % 3 - 1;
         }
     }
     drawGhosts();
@@ -168,14 +151,38 @@ int isWin() {
             if (maze[i][j] == '.') return 0;
         }
     }
+    // Reposicionar bolinhas
+    for (int i = 1; i < ROWS - 1; i++) {
+      for (int j = 1; j < COLS - 1; j++) {
+         int isOccupied = (i == y && j == x);
+         for (int k = 0; k < numGhosts; k++) {
+             if (ghosts[k].x == j && ghosts[k].y == i) {
+                 isOccupied = 1;
+                 break;
+                }
+            }
+         if (!isOccupied && maze[i][j] == ' ') {
+             maze[i][j] = (rand() % 5 == 0) ? '.' : ' ';
+          }
+        }
+    }
+    score += 10; // Bônus por limpar o mapa
+    drawMaze();  // Atualizar labirinto
     return 1;
 }
 
 // Desenha o placar
 void drawScore() {
-    screenGotoxy(offsetX, offsetY + ROWS + 1); // Posição abaixo do labirinto
-    printf("Pontuação: %d   ", score);        // Exibe a pontuação
-    fflush(stdout);                          // Garante a atualização imediata
+    screenGotoxy(offsetX, offsetY + ROWS + 1);
+    printf("Pontuação: %d   ", score);
+    if (score > 0 && score % 10 == 0) {
+        screenGotoxy(offsetX, offsetY + ROWS + 2);
+        printf("Bom trabalho! Continue assim!");
+    } else {
+        screenGotoxy(offsetX, offsetY + ROWS + 2);
+        printf("                          "); // Apaga mensagem anterior
+    }
+    fflush(stdout);
 }
 
 // Desenha o labirinto na tela
@@ -219,11 +226,12 @@ void showStartScreen() {
 void showGameOverScreen(int won) {
     screenClear();
     if (won) {
-        printf("Parabéns! Você venceu todos os níveis!\n");
+        printf("Parabéns! Você venceu!\n");
     } else {
         printf("Game Over! Você foi pego por um fantasma!\n");
     }
-    printf("Pontuação final: %d\n", score);
+    if (score > highScore) highScore = score;
+    printf("Pontuação: %d   Maior Pontuação: %d\n", score, highScore);
     printf("Pressione 'R' para reiniciar ou qualquer outra tecla para sair...");
     fflush(stdout);
     while (!keyhit());
@@ -234,7 +242,6 @@ void showGameOverScreen(int won) {
     } else {
         exit(0);
     }
-
 }
 
 // Incremento de Pontuação
@@ -268,21 +275,26 @@ void movePacman(char direction) {
 void respawnPontos() {
     static clock_t lastRespawnTime = 0;
     clock_t currentTime = clock();
-
-    // Reaparecer bolinhas a cada 3 segundos
     if (((currentTime - lastRespawnTime) / CLOCKS_PER_SEC) < 3) return;
     lastRespawnTime = currentTime;
 
-    // Escolher uma posição aleatória válida para adicionar uma bolinha
     int posX, posY;
     do {
-        posX = rand() % (COLS - 2) + 1;
-        posY = rand() % (ROWS - 2) + 1;
-    } while (maze[posY][posX] != ' '); // Certificar-se de que a posição está vazia
+      posX = rand() % (COLS - 2) + 1;
+      posY = rand() % (ROWS - 2) + 1;
 
-    maze[posY][posX] = '.'; // Adicionar uma bolinha
+      int isNearGhost = 0;
+       for (int i = 0; i < numGhosts; i++) {
+         if (ghosts[i].x == posX && ghosts[i].y == posY) {
+             isNearGhost = 1;
+             break;
+            }
+        }
+    } while (maze[posY][posX] != ' ' || (abs(posX - x) < 3 && abs(posY - y) < 3) || isNearGhost);
+
+    maze[posY][posX] = '.';
     screenGotoxy(offsetX + posX, offsetY + posY);
-    printf("\033[1;34m.\033[0m"); // Azul brilhante
+    printf("\033[1;34m.\033[0m");
 }
 
 int main() {
