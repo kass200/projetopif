@@ -106,7 +106,7 @@ void moveGhosts() {
         int newY = ghosts[i].y + ghosts[i].dirY;
 
         // Verificar se a nova posição é válida (não é uma parede e está dentro dos limites)
-        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
+        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#' && maze[newY][newX] != '_' && maze[newY][newX] != '|') {
             // Apagar a posição antiga
             screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
             printf(" ");
@@ -317,11 +317,12 @@ void respawnPontos() {
     lastRespawnTime = currentTime;
 
     int posX, posY, attempts = 0;
+    int isNearGhost = 0;
     do {
         posX = rand() % (COLS - 2) + 1;
         posY = rand() % (ROWS - 2) + 1;
 
-        int isNearGhost = 0;
+        
         for (int i = 0; i < numGhosts; i++) {
             if (ghosts[i].x == posX && ghosts[i].y == posY) {
                 isNearGhost = 1;
