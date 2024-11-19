@@ -287,11 +287,6 @@ void movePacman(char direction) {
             screenGotoxy(offsetX + x, offsetY + y);
             printf(" ");  // Deixa a posição em branco
 
-            if (maze[newY][newX] == '.') {
-                score++;  // Coleta o ponto
-                maze[newY][newX] = ' ';  // Apaga o ponto do labirinto
-            }
-
             // Atualiza a posição do Pac-Man
             x = newX;
             y = newY;
@@ -303,8 +298,9 @@ void movePacman(char direction) {
             if (maze[newY][newX] == '.') {
                 score += 1;
                 maze[newY][newX] = ' ';
-                drawScore();
             }
+
+            drawScore();
         }
 
     }
