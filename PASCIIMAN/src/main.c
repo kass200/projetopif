@@ -258,7 +258,7 @@ void movePacman(char direction) {
      // Verifica se o novo movimento está dentro dos limites do labirinto
     if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS) {
         // Verifica se a nova posição não é uma parede (nem #, nem |, nem )
-        if (maze[newY][newX] != '#' && maze[newY][newX] != '|' && maze[newY][newX] != '') {
+        if (maze[newY][newX] != '#' && maze[newY][newX] != '|' && maze[newY][newX] != '_') {
             // Apaga a posição anterior do Pac-Man
             screenGotoxy(offsetX + x, offsetY + y);
             printf(" ");  // Deixa a posição em branco
@@ -281,6 +281,8 @@ void movePacman(char direction) {
             maze[newY][newX] = ' ';
             drawScore();
         }
+    }
+
     }
 }
 
