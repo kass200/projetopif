@@ -211,7 +211,6 @@ void showGameOverScreen(int won) {
     }
 }
 
-// Movimenta o Pac-Man
 void movePacman(char direction) {
     int newX = x, newY = y;
 
@@ -227,10 +226,15 @@ void movePacman(char direction) {
     if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS) {
         // Verifica se a nova posição não é uma parede (nem #, nem |, nem _)
         if (maze[newY][newX] != '#' && maze[newY][newX] != '|' && maze[newY][newX] != '_') {
+            // Apaga a posição anterior do Pac-Man
+            screenGotoxy(offsetX + x, offsetY + y);
+            printf(" ");  // Deixa a posição em branco
+
             if (maze[newY][newX] == '.') {
                 score++;  // Coleta o ponto
                 maze[newY][newX] = ' ';  // Apaga o ponto do labirinto
             }
+
             // Atualiza a posição do Pac-Man
             x = newX;
             y = newY;
