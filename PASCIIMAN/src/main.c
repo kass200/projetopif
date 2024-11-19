@@ -171,6 +171,14 @@ void showStartScreen() {
     readch();
 }
 
+// Função para reiniciar o nível
+void resetLevel() {
+    x = 1; y = 1;
+    score = 0;
+    loadLevel();
+    initGhosts();
+    drawMaze();
+}
 
 // Tela de Game Over
 void showGameOverScreen(int won) {
