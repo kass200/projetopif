@@ -118,10 +118,15 @@ void initGhosts() {
         do {
             posX = rand() % (COLS - 2) + 1;
             posY = rand() % (ROWS - 2) + 1;
-        } while (maze[posY][posX] == '#' || maze[posY][posX] =="|" || maze[posY][posX] == "_" );
+        } while (maze[posY][posX] == '#' || maze[posY][posX] == '|' || maze[posY][posX] == '_');
         ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
+
+        // Desenhar o fantasma com cor vermelha
+        screenGotoxy(offsetX + posX, offsetY + posY);
+        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
     }
 }
+
 
 // Carrega o nível atual
 void loadLevel() {
@@ -159,12 +164,13 @@ void drawMaze() {
 void showStartScreen() {
     screenClear();
     screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2 - 2);
-    printf("===== PASCIIMAN =====");
+    printf("\033[1;34m===== PASCIIMAN =====\033[0m"); // Azul brilhante
     screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
-    printf("Pressione qualquer tecla para começar...");
+    printf("\033[1;32mPressione qualquer tecla para começar...\033[0m"); // Verde brilhante
     while (!keyhit());
     readch();
 }
+
 
 // Tela de Game Over
 void showGameOverScreen(int won) {
@@ -204,9 +210,8 @@ void movePacman(char direction) {
         x = newX;
         y = newY;
         // Desenhar na nova posição
-        screenGotoxy(offsetX + x, offsetY + y);
-        printf("P");
-
+         screenGotoxy(offsetX + x, offsetY + y);
+         printf("\033[1;33mP\033[0m"); // ANSI para texto amarelo brilhante
         if (maze[newY][newX] == '.') {
             score += speedMultiplier;
             maze[newY][newX] = ' ';
