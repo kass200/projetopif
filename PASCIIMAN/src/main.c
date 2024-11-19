@@ -9,8 +9,10 @@
 #define COLS 40
 #define MAX_LEVELS 5
 #define MAX_GHOSTS 5
+#define SCREEN_WIDTH 80  // Largura padrão do terminal
+#define SCREEN_HEIGHT 24 // Altura padrão do terminal
 
-// Funções declaradas
+// Declarações de funções
 void showGameOverScreen(int);
 void showStartScreen();
 void drawMaze();
@@ -27,6 +29,8 @@ int score = 0;
 int currentLevel = 0;
 int numGhosts = 2;
 int speedMultiplier = 1;
+int offsetX = 0; // Deslocamento horizontal para centralizar o labirinto
+int offsetY = 0; // Deslocamento vertical para centralizar o labirinto
 
 typedef struct {
     int x, y;
@@ -95,14 +99,10 @@ char levels[MAX_LEVELS][ROWS][COLS] = {
     }
 };
 
-// Função para reinicializar o nível
-void resetLevel() {
-    x = 1; y = 1;
-    score = 0;
-    loadLevel();
-    initGhosts();
-    drawMaze();
-    drawScore();
+// Função para calcular deslocamentos
+void calculateOffsets() {
+    offsetX = (SCREEN_WIDTH - COLS) / 2;  // Centraliza horizontalmente
+    offsetY = (SCREEN_HEIGHT - ROWS) / 2; // Centraliza verticalmente
 }
 
 // Inicializa os fantasmas
@@ -118,6 +118,7 @@ void initGhosts() {
     }
 }
 
+// Carrega o nível atual
 void loadLevel() {
     memcpy(maze, levels[currentLevel], sizeof(levels[currentLevel]));
     numGhosts = 2 + currentLevel;
@@ -134,29 +135,33 @@ int isWin() {
     return 1;
 }
 
+// Desenha o placar
 void drawScore() {
-    screenGotoxy(0, ROWS);
+    screenGotoxy(offsetX, offsetY + ROWS + 1);
     printf("Pontuação: %d   ", score);
 }
 
+// Desenha o labirinto na tela
 void drawMaze() {
     for (int i = 0; i < ROWS; i++) {
-        screenGotoxy(0, i);
+        screenGotoxy(offsetX, offsetY + i);
         printf("%s", maze[i]);
     }
     drawScore();
 }
 
+// Tela inicial
 void showStartScreen() {
     screenClear();
-    screenGotoxy(10, 5);
+    screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2 - 2);
     printf("===== PASCIIMAN =====");
-    screenGotoxy(10, 7);
+    screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
     printf("Pressione qualquer tecla para começar...");
     while (!keyhit());
     readch();
 }
 
+// Tela de Game Over
 void showGameOverScreen(int won) {
     screenClear();
     if (won) {
@@ -175,6 +180,7 @@ void showGameOverScreen(int won) {
     }
 }
 
+// Movimenta o Pac-Man
 void movePacman(char direction) {
     int newX = x, newY = y;
 
@@ -187,11 +193,13 @@ void movePacman(char direction) {
     }
 
     if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
-        screenGotoxy(x, y);
+        // Apagar posição antiga
+        screenGotoxy(offsetX + x, offsetY + y);
         printf(" ");
         x = newX;
         y = newY;
-        screenGotoxy(x, y);
+        // Desenhar na nova posição
+        screenGotoxy(offsetX + x, offsetY + y);
         printf("P");
 
         if (maze[newY][newX] == '.') {
@@ -206,6 +214,7 @@ int main() {
     int ch = 0;
     screenInit(1);
     keyboardInit();
+    calculateOffsets();
 
     showStartScreen();
     loadLevel();
