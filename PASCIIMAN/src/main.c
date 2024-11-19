@@ -17,6 +17,8 @@ void showGameOverScreen(int);
 void showStartScreen();
 void drawMaze();
 void drawScore();
+void drawGhosts();
+void moveGhosts();
 void initGhosts();
 void resetLevel();
 void loadLevel();
@@ -78,9 +80,40 @@ void initGhosts() {
         do {
             posX = rand() % (COLS - 2) + 1;
             posY = rand() % (ROWS - 2) + 1;
-        } while (maze[posY][posX] == '#');
+        } while (maze[posY][posX] == '#' || maze[posY][posX] == 'P');
         ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
     }
+}
+
+// Desenha os fantasmas na tela
+void drawGhosts() {
+    for (int i = 0; i < numGhosts; i++) {
+        screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
+        printf("G");
+    }
+}
+
+// Move os fantasmas
+void moveGhosts() {
+    for (int i = 0; i < numGhosts; i++) {
+        int newX = ghosts[i].x + ghosts[i].dirX;
+        int newY = ghosts[i].y + ghosts[i].dirY;
+
+        if (maze[newY][newX] == '#') {
+            ghosts[i].dirX = -ghosts[i].dirX;
+            ghosts[i].dirY = -ghosts[i].dirY;
+        } else {
+            screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
+            printf(" ");
+            ghosts[i].x = newX;
+            ghosts[i].y = newY;
+        }
+
+        if (ghosts[i].x == x && ghosts[i].y == y) {
+            showGameOverScreen(0);
+        }
+    }
+    drawGhosts();
 }
 
 // Função para reiniciar o nível
@@ -90,6 +123,7 @@ void resetLevel() {
     loadLevel();
     initGhosts();
     drawMaze();
+    drawGhosts();
 }
 
 // Carrega o nível atual
@@ -122,6 +156,7 @@ void drawMaze() {
         printf("%s", maze[i]);
     }
     drawScore();
+    drawGhosts();
 }
 
 // Tela inicial
@@ -131,8 +166,11 @@ void showStartScreen() {
     printf("===== PASCIIMAN =====");
     screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
     printf("Pressione qualquer tecla para começar...");
+    fflush(stdout); 
     while (!keyhit());
     readch();
+    screenClear();
+    screenUpdate();
 }
 
 // Tela de Game Over
@@ -145,6 +183,7 @@ void showGameOverScreen(int won) {
     }
     printf("Pontuação final: %d\n", score);
     printf("Pressione 'R' para reiniciar ou qualquer outra tecla para sair...");
+    fflush(stdout);
     while (!keyhit());
     char choice = readch();
     if (choice == 'r' || choice == 'R') {
@@ -190,13 +229,10 @@ int main() {
     keyboardInit();
     calculateOffsets();
 
+    // Exibir tela inicial
     showStartScreen();
-    
-    while (!keyhit()); 
-    readch();          
-    screenClear();
 
-    
+    // Carregar o primeiro nível
     loadLevel();
     initGhosts();
     drawMaze();
@@ -206,6 +242,8 @@ int main() {
             ch = readch();
             movePacman(ch);
         }
+
+        moveGhosts();
 
         if (isWin()) {
             showGameOverScreen(1);
