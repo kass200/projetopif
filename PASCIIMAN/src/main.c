@@ -29,7 +29,7 @@ void movePacman(char);
 int x = 1, y = 1;
 int score = 0;
 int currentLevel = 0;
-int numGhosts = 2;
+int numGhosts = 4;
 int speedMultiplier = 1;
 int offsetX = 0; // Deslocamento horizontal para centralizar o labirinto
 int offsetY = 0; // Deslocamento vertical para centralizar o labirinto
@@ -79,12 +79,8 @@ void initGhosts() {
         do {
             posX = rand() % (COLS - 2) + 1;
             posY = rand() % (ROWS - 2) + 1;
-        } while (maze[posY][posX] == '#' || maze[posY][posX] == '|' || maze[posY][posX] == '_');
-        ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
-
-        // Desenhar o fantasma com cor vermelha
-        screenGotoxy(offsetX + posX, offsetY + posY);
-        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
+        } while (maze[posY][posX] != '.'); // Garantir que os fantasmas comecem apenas em posições válidas
+        ghosts[i] = (Ghost){posX, posY, 0, 0}; // Inicializar com direção nula
     }
 }
 
@@ -97,54 +93,52 @@ void drawGhosts() {
 }
 
 void moveGhosts() {
-    ghostMoveCounter++;
-    if (ghostMoveCounter % 170000 != 0) return; // Reduz a frequência de movimento dos fantasmas
+    static clock_t lastMoveTime = 0;
+    clock_t currentTime = clock();
+
+    // Atualizar fantasmas a cada 500ms
+    if (((currentTime - lastMoveTime) / CLOCKS_PER_SEC) < 0.5) return;
+    lastMoveTime = currentTime;
 
     for (int i = 0; i < numGhosts; i++) {
         int newX = ghosts[i].x + ghosts[i].dirX;
         int newY = ghosts[i].y + ghosts[i].dirY;
 
-        // Verificar se a nova posição é válida (não é uma parede e está dentro dos limites)
-        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
-            // Apagar a posição antiga
+        // Verificar se a nova posição é válida
+        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] == '.') {
+            // Apagar posição antiga
             screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-            printf(" ");
+            printf(".");
 
-            // Atualizar a posição
+            // Atualizar posição
             ghosts[i].x = newX;
             ghosts[i].y = newY;
 
-            // Verificar colisão com Pac-Man
+            // Colisão com Pac-Man
             if (ghosts[i].x == x && ghosts[i].y == y) {
                 showGameOverScreen(0);
             }
         } else {
-            // Se a direção está bloqueada, escolher uma nova direção aleatória válida
-            int directions[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}; // Direções possíveis (direita, esquerda, baixo, cima)
-            int validDirectionFound = 0;
-
-            for (int attempt = 0; attempt < 4; attempt++) {
-                int randIndex = rand() % 4; // Escolher uma direção aleatória
-                int testX = ghosts[i].x + directions[randIndex][0];
-                int testY = ghosts[i].y + directions[randIndex][1];
-
-                if (testX >= 0 && testX < COLS && testY >= 0 && testY < ROWS && maze[testY][testX] != '#') {
-                    ghosts[i].dirX = directions[randIndex][0];
-                    ghosts[i].dirY = directions[randIndex][1];
-                    validDirectionFound = 1;
+            // Selecionar nova direção
+            int directions[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+            int validDir = 0;
+            for (int d = 0; d < 4; d++) {
+                int testX = ghosts[i].x + directions[d][0];
+                int testY = ghosts[i].y + directions[d][1];
+                if (testX >= 0 && testX < COLS && testY >= 0 && testY < ROWS && maze[testY][testX] == '.') {
+                    ghosts[i].dirX = directions[d][0];
+                    ghosts[i].dirY = directions[d][1];
+                    validDir = 1;
                     break;
                 }
             }
-
-            // Se nenhuma direção válida foi encontrada, inverter a direção atual
-            if (!validDirectionFound) {
-                ghosts[i].dirX = -ghosts[i].dirX;
-                ghosts[i].dirY = -ghosts[i].dirY;
+            if (!validDir) {
+                // Inverter direção se nenhuma direção válida for encontrada
+                ghosts[i].dirX *= -1;
+                ghosts[i].dirY *= -1;
             }
         }
     }
-
-    // Redesenhar os fantasmas em suas novas posições
     drawGhosts();
 }
 
@@ -243,6 +237,7 @@ void showGameOverScreen(int won) {
 
 }
 
+// Incremento de Pontuação
 void movePacman(char direction) {
     int newX = x, newY = y;
 
@@ -254,35 +249,21 @@ void movePacman(char direction) {
         default: return;
     }
 
-    
-    // Verifica se o novo movimento está dentro dos limites do labirinto
-    if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS) {
-        // Verifica se a nova posição não é uma parede (nem #, nem |, nem _)
-        if (maze[newY][newX] != '#' && maze[newY][newX] != '|' && maze[newY][newX] != '_') {
-            // Apaga a posição anterior do Pac-Man
-            screenGotoxy(offsetX + x, offsetY + y);
-            printf(" ");  // Deixa a posição em branco
+    if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
+        screenGotoxy(offsetX + x, offsetY + y);
+        printf(" ");
+        x = newX;
+        y = newY;
+        screenGotoxy(offsetX + x, offsetY + y);
+        printf("\033[1;33mP\033[0m");
 
-            if (maze[newY][newX] == '.') {
-                score++;  // Coleta o ponto
-                maze[newY][newX] = ' ';  // Apaga o ponto do labirinto
-            }
-
-            // Atualiza a posição do Pac-Man
-            x = newX;
-            y = newY;
-
-            // Desenha o Pac-Man na nova posição
-            screenGotoxy(offsetX + x, offsetY + y);
-            printf("\033[1;33mP\033[0m");
-            if (maze[newY][newX] == '.') {
-               score += speedMultiplier; // Incrementa o placar
-               maze[newY][newX] = ' ';   // Remove o ponto do labirinto
-               drawScore();              // Atualiza o placar na tela
-}
-
+        if (maze[newY][newX] == '.') {
+            score += 1;
+            maze[newY][newX] = ' ';
+            drawScore();
+        }
     }
-}}
+}
 
 int main() {
     int ch = 0;
