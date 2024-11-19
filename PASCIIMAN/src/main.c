@@ -95,7 +95,7 @@ void drawGhosts() {
 
 void moveGhosts() {
     ghostMoveCounter++;
-    if (ghostMoveCounter % 5 != 0) return; // Reduz a frequência de movimento dos fantasmas
+    if (ghostMoveCounter % 170000 != 0) return; // Reduz a frequência de movimento dos fantasmas
 
     for (int i = 0; i < numGhosts; i++) {
         int newX = ghosts[i].x + ghosts[i].dirX;
