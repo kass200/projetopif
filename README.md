@@ -13,12 +13,25 @@ Este projeto é desenvolvido por alunos Cesar School, e é pertencente a discipl
 
 ## Descrição do Projeto
 
-O jogo segue a estrutura básica do Pac-Man, com o jogador controlando um personagem que se move em um labirinto, devorando pontos e escapando dos fantasmas. Este projeto visa explorar a linguagem Haskell, abordando tópicos como:
+Nosso jogo, o PASCIIMAN, segue a estrutura básica do Pac-Man, onde o jogador controla um personagem que se move em um labirinto, devorando pontos e escapando dos fantasmas. Você deve coletar todos os pontos espalhados pelo mapa e entrar por um portal para poder passar de nível.
+
+A cada nível, o mapa vai ficando mais complexo, aumentando de tamanho e com lugares mais difíceis de acessar. Você encontrará também novas espécies de fantasmas, mas eles não são tão perigosos, então vai ficar tudo bem... Desde que você não encontre o- Na verdade, apenas ler seria decepcionante, então você terá que jogar e ver por conta própria. 
+
+Este projeto visa explorar a linguagem Haskell, abordando tópicos como:
 
 - **Movimentação do personagem** no labirinto
 - **Interatividade** entre o jogador e os fantasmas
 - **Pontuação** e progresso no jogo
 - **Renderização** básica em Haskell
+
+## Mecânicas de movimentação
+
+Por enquanto, temos apenas a movimentação básica, ou seja, a locomoção.
+
+W - Mover para cima  
+A - Mover para esquerda  
+S - Mover para baixo  
+D - Mover para direita  
 
 ## Estrutura do Projeto
 
