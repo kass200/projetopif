@@ -105,23 +105,25 @@ void moveGhosts() {
         int newX = ghosts[i].x + ghosts[i].dirX;
         int newY = ghosts[i].y + ghosts[i].dirY;
 
-        // Verificar se a nova posição é válida (não é uma parede e está dentro dos limites)
-        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
-            // Apagar a posição antiga
-            screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-            printf(" ");
+        // Verificar se a nova posição é válida (não é uma parede, ponto ou fora dos limites)
+        if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && 
+            maze[newY][newX] != '#' && maze[newY][newX] != '.') {
 
-            // Atualizar a posição
+            // Apagar a posição antiga do fantasma
+            screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
+            printf(" "); // Substituir pelo espaço vazio
+
+            // Atualizar a posição do fantasma
             ghosts[i].x = newX;
             ghosts[i].y = newY;
 
             // Verificar colisão com Pac-Man
             if (ghosts[i].x == x && ghosts[i].y == y) {
-                showGameOverScreen(0);
+                showGameOverScreen(0); // Pac-Man foi pego
             }
         } else {
             // Se a direção está bloqueada, escolher uma nova direção aleatória válida
-            int directions[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}; // Direções possíveis (direita, esquerda, baixo, cima)
+            int directions[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}; // Direções possíveis: direita, esquerda, baixo, cima
             int validDirectionFound = 0;
 
             for (int attempt = 0; attempt < 4; attempt++) {
@@ -129,7 +131,9 @@ void moveGhosts() {
                 int testX = ghosts[i].x + directions[randIndex][0];
                 int testY = ghosts[i].y + directions[randIndex][1];
 
-                if (testX >= 0 && testX < COLS && testY >= 0 && testY < ROWS && maze[testY][testX] != '#') {
+                // Verificar se a nova posição é válida
+                if (testX >= 0 && testX < COLS && testY >= 0 && testY < ROWS && 
+                    maze[testY][testX] != '#' && maze[testY][testX] != '.') {
                     ghosts[i].dirX = directions[randIndex][0];
                     ghosts[i].dirY = directions[randIndex][1];
                     validDirectionFound = 1;
@@ -148,6 +152,7 @@ void moveGhosts() {
     // Redesenhar os fantasmas em suas novas posições
     drawGhosts();
 }
+
 
 
 
