@@ -265,6 +265,16 @@ void movePacman(char direction) {
     }
 }
 
+// Função para verificar colisão entre Pac-Man e os fantasmas
+int checkCollision() {
+    for (int i = 0; i < numGhosts; i++) {
+        if (x == ghosts[i].x && y == ghosts[i].y) {
+            return 1; // Colisão detectada
+        }
+    }
+    return 0;
+}
+
 int main() {
     int ch = 0;
 
@@ -295,6 +305,10 @@ int main() {
         }
 
         screenUpdate();
+        if (checkCollision()) {
+            showGameOverScreen(score);
+            break;
+        }
     }
 
     // Tela de fim de jogo
