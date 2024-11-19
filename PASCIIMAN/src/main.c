@@ -184,11 +184,19 @@ void movePacman(char direction) {
 
 int main() {
     int ch = 0;
+
+    // Inicializar bibliotecas
     screenInit(1);
     keyboardInit();
     calculateOffsets();
 
     showStartScreen();
+    
+    while (!keyhit()); 
+    readch();          
+    screenClear();
+
+    
     loadLevel();
     initGhosts();
     drawMaze();
@@ -207,8 +215,12 @@ int main() {
         screenUpdate();
     }
 
+    // Tela de fim de jogo
     showGameOverScreen(0);
+
+    // Limpar recursos
     keyboardDestroy();
     screenDestroy();
+
     return 0;
 }
