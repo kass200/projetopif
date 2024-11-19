@@ -276,12 +276,12 @@ void movePacman(char direction) {
             screenGotoxy(offsetX + x, offsetY + y);
             printf("\033[1;33mP\033[0m");
 
-        if (maze[newY][newX] == '.') {
-            score += 1;
-            maze[newY][newX] = ' ';
-            drawScore();
+            if (maze[newY][newX] == '.') {
+                score += 1;
+                maze[newY][newX] = ' ';
+                drawScore();
+            }
         }
-    }
 
     }
 }
