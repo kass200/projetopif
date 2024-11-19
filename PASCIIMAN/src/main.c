@@ -237,6 +237,10 @@ int main() {
     // Exibir tela inicial
     showStartScreen();
 
+    while (!keyhit());
+    readch();
+    screenClear();
+
     // Carregar o primeiro nível
     loadLevel();
     initGhosts();
