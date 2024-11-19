@@ -42,9 +42,9 @@ typedef struct {
 Ghost ghosts[MAX_GHOSTS];
 char maze[ROWS][COLS];
 
-// Labirintos
+// Labirinto
 char levels[MAX_LEVELS][ROWS][COLS] = {
-    { // Nível 1 (Fácil)
+    { 
       "___________________________________",
      "|###################################|",
      "|P.............#....................|",
@@ -92,7 +92,7 @@ void initGhosts() {
 void drawGhosts() {
     for (int i = 0; i < numGhosts; i++) {
         screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-        printf("G");
+        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
     }
 }
 
@@ -179,9 +179,11 @@ int isWin() {
 
 // Desenha o placar
 void drawScore() {
-    screenGotoxy(offsetX, offsetY + ROWS + 1);
-    printf("Pontuação: %d   ", score);
+    screenGotoxy(offsetX, offsetY + ROWS + 1); // Posição abaixo do labirinto
+    printf("Pontuação: %d   ", score);        // Exibe a pontuação
+    fflush(stdout);                          // Garante a atualização imediata
 }
+
 // Desenha o labirinto na tela
 void drawMaze() {
     for (int i = 0; i < ROWS; i++) {
@@ -273,11 +275,12 @@ void movePacman(char direction) {
             // Desenha o Pac-Man na nova posição
             screenGotoxy(offsetX + x, offsetY + y);
             printf("\033[1;33mP\033[0m");
-        if (maze[newY][newX] == '.') {
-            score += speedMultiplier;
-            maze[newY][newX] = ' ';
-            drawScore();
-        }
+            if (maze[newY][newX] == '.') {
+               score += speedMultiplier; // Incrementa o placar
+               maze[newY][newX] = ' ';   // Remove o ponto do labirinto
+               drawScore();              // Atualiza o placar na tela
+}
+
     }
 }}
 
@@ -292,7 +295,7 @@ int main() {
     // Exibir tela inicial
     showStartScreen();
 
-    // Carregar o primeiro nível
+    // Carrega o labirinto
     loadLevel();
     initGhosts();
     drawMaze();
