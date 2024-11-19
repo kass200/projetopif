@@ -80,8 +80,8 @@ void initGhosts() {
         do {
             posX = rand() % (COLS - 2) + 1;
             posY = rand() % (ROWS - 2) + 1;
-        } while (maze[posY][posX] != '.'); // Garantir que os fantasmas comecem apenas em posições válidas
-        ghosts[i] = (Ghost){posX, posY, 0, 0}; // Inicializar com direção nula
+        } while (maze[posY][posX] != '.');
+        ghosts[i] = (Ghost){posX, posY, (rand() % 3) - 1, (rand() % 3) - 1};
     }
 }
 
@@ -96,10 +96,9 @@ void drawGhosts() {
 void moveGhosts() {
     static clock_t lastMoveTime = 0;
     clock_t currentTime = clock();
-    float delay = 0.5 - (score / 100.0); // Reduz o tempo de espera à medida que a pontuação aumenta
-    if (delay < 0.2) delay = 0.2;       // Define um limite mínimo
+    float delay = 0.5 - (score / 100.0);
+    if (delay < 0.2) delay = 0.2;
 
-    // Atualizar fantasmas com base no delay calculado
     if (((currentTime - lastMoveTime) / CLOCKS_PER_SEC) < delay) return;
     lastMoveTime = currentTime;
 
@@ -107,7 +106,6 @@ void moveGhosts() {
         int newX = ghosts[i].x + ghosts[i].dirX;
         int newY = ghosts[i].y + ghosts[i].dirY;
 
-        // Verificar se a nova posição é válida
         if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#' && maze[newY][newX] != '|') {
             screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
             printf(" ");
@@ -118,8 +116,8 @@ void moveGhosts() {
                 showGameOverScreen(0);
             }
         } else {
-            ghosts[i].dirX = rand() % 3 - 1; // Escolher nova direção
-            ghosts[i].dirY = rand() % 3 - 1;
+            ghosts[i].dirX = (rand() % 3) - 1;
+            ghosts[i].dirY = (rand() % 3) - 1;
         }
     }
     drawGhosts();
@@ -292,25 +290,29 @@ void respawnPontos() {
     if (((currentTime - lastRespawnTime) / CLOCKS_PER_SEC) < 3) return;
     lastRespawnTime = currentTime;
 
-    int posX, posY;
-    int isNearGhost = 0;
-    
+    int posX, posY, attempts = 0;
     do {
-      posX = rand() % (COLS - 2) + 1;
-      posY = rand() % (ROWS - 2) + 1;
+        posX = rand() % (COLS - 2) + 1;
+        posY = rand() % (ROWS - 2) + 1;
 
-       for (int i = 0; i < numGhosts; i++) {
-         if (ghosts[i].x == posX && ghosts[i].y == posY) {
-             isNearGhost = 1;
-             break;
+        int isNearGhost = 0;
+        for (int i = 0; i < numGhosts; i++) {
+            if (ghosts[i].x == posX && ghosts[i].y == posY) {
+                isNearGhost = 1;
+                break;
             }
         }
+        attempts++;
+        if (attempts > 100) break; // Evita loop infinito
     } while (maze[posY][posX] != ' ' || (abs(posX - x) < 3 && abs(posY - y) < 3) || isNearGhost);
 
-    maze[posY][posX] = '.';
-    screenGotoxy(offsetX + posX, offsetY + posY);
-    printf("\033[1;34m.\033[0m");
+    if (maze[posY][posX] == ' ') {
+        maze[posY][posX] = '.';
+        screenGotoxy(offsetX + posX, offsetY + posY);
+        printf("\033[1;34m.\033[0m");
+    }
 }
+
 
 // Função para verificar colisão entre Pac-Man e os fantasmas
 int checkCollision() {
