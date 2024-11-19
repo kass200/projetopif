@@ -44,17 +44,25 @@ char maze[ROWS][COLS];
 
 // Labirintos
 char levels[MAX_LEVELS][ROWS][COLS] = {
-    { "#######################################",
-      "#P.............#.....................#",
-      "#.#######.######.###########.#######.#",
-      "#.#...............................#.#",
-      "#.#.########.###########.########.#.#",
-      "#.#........#.#...........#........#.#",
-      "#.#######.#.#.###########.#.#######.#",
-      "#...................................#",
-      "#######################################"
-    },
-    
+    { // Nível 1 (Fácil)
+      "___________________________________",
+     "|###################################|",
+     "|P.............#....................|",
+     "|.#######.######.###########.######.|",
+     "|.#...............................#.|",
+     "|.#.########.###########.########.#.|",
+     "|.#........#.#...........#........#.|",
+     "|.#######...#..#########..#.#######.|",
+     "|............#.....##....#..........|",
+     "|..##............######..#......###.|",
+     "|#.#####.....#.....##..#......#..###|",
+     "|#.####..#####.........########.###.|",
+     "|..........########....#..##......##|",
+     "|.#.#......#.............#.......#.#|",
+     "|.#.##..####.#########.#.#######.#.#|",
+     "|.#........#.#...........#.......#.#|",
+     "|___________________________________|"
+    }
 };
 
 // Função para calcular deslocamentos
@@ -71,8 +79,12 @@ void initGhosts() {
         do {
             posX = rand() % (COLS - 2) + 1;
             posY = rand() % (ROWS - 2) + 1;
-        } while (maze[posY][posX] == '#' || maze[posY][posX] == 'P');
+        } while (maze[posY][posX] == '#' || maze[posY][posX] == '|' || maze[posY][posX] == '_');
         ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
+
+        // Desenhar o fantasma com cor vermelha
+        screenGotoxy(offsetX + posX, offsetY + posY);
+        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
     }
 }
 
@@ -170,24 +182,36 @@ void drawScore() {
     screenGotoxy(offsetX, offsetY + ROWS + 1);
     printf("Pontuação: %d   ", score);
 }
-
-// Desenha o labirinto
+// Desenha o labirinto na tela
 void drawMaze() {
     for (int i = 0; i < ROWS; i++) {
         screenGotoxy(offsetX, offsetY + i);
-        printf("%s", maze[i]);
+        for (int j = 0; j < COLS; j++) {
+            if (maze[i][j] == '#') {
+                printf("\033[1;34m#\033[0m"); // Azul brilhante para paredes
+            } else if (maze[i][j] == '.') {
+                printf("\033[1;34m.\033[0m"); // Azul brilhante para pontos
+            } else if (maze[i][j] == 'P') {
+                printf("\033[1;33mP\033[0m"); // Amarelo brilhante para Pac-Man
+            } else if (maze[i][j] == '_') {
+                printf("\033[1;34m_\033[0m"); // Azul brilhante para o limite inferior
+            } else if (maze[i][j] == '|') {
+                printf("\033[1;34m|\033[0m"); // Azul brilhante para bordas verticais
+            } else {
+                printf(" "); // Espaço vazio
+            }
+        }
     }
     drawScore();
     drawGhosts();
 }
-
 // Tela inicial
 void showStartScreen() {
     screenClear();
     screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2 - 2);
-    printf("===== PASCIIMAN =====");
+    printf("\033[1;34m===== PASCIIMAN =====\033[0m"); // Azul brilhante
     screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
-    printf("Pressione qualquer tecla para começar...");
+    printf("\033[1;32mPressione qualquer tecla para começar...\033[0m"); // Verde brilhante
     fflush(stdout);
     while (!keyhit());
     readch();
@@ -217,7 +241,6 @@ void showGameOverScreen(int won) {
 
 }
 
-// Movimenta o Pac-Man
 void movePacman(char direction) {
     int newX = x, newY = y;
 
@@ -229,21 +252,34 @@ void movePacman(char direction) {
         default: return;
     }
 
-    if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#') {
-        screenGotoxy(offsetX + x, offsetY + y);
-        printf(" ");
-        x = newX;
-        y = newY;
-        screenGotoxy(offsetX + x, offsetY + y);
-        printf("P");
+    
+    // Verifica se o novo movimento está dentro dos limites do labirinto
+    if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS) {
+        // Verifica se a nova posição não é uma parede (nem #, nem |, nem _)
+        if (maze[newY][newX] != '#' && maze[newY][newX] != '|' && maze[newY][newX] != '_') {
+            // Apaga a posição anterior do Pac-Man
+            screenGotoxy(offsetX + x, offsetY + y);
+            printf(" ");  // Deixa a posição em branco
 
+            if (maze[newY][newX] == '.') {
+                score++;  // Coleta o ponto
+                maze[newY][newX] = ' ';  // Apaga o ponto do labirinto
+            }
+
+            // Atualiza a posição do Pac-Man
+            x = newX;
+            y = newY;
+
+            // Desenha o Pac-Man na nova posição
+            screenGotoxy(offsetX + x, offsetY + y);
+            printf("\033[1;33mP\033[0m");
         if (maze[newY][newX] == '.') {
             score += speedMultiplier;
             maze[newY][newX] = ' ';
             drawScore();
         }
     }
-}
+}}
 
 int main() {
     int ch = 0;
