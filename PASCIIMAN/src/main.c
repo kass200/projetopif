@@ -317,11 +317,12 @@ void respawnPontos() {
     lastRespawnTime = currentTime;
 
     int posX, posY, attempts = 0;
+    int isNearGhost = 0;
+    
     do {
         posX = rand() % (COLS - 2) + 1;
         posY = rand() % (ROWS - 2) + 1;
 
-        int isNearGhost = 0;
         for (int i = 0; i < numGhosts; i++) {
             if (ghosts[i].x == posX && ghosts[i].y == posY) {
                 isNearGhost = 1;
