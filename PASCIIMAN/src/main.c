@@ -265,6 +265,26 @@ void movePacman(char direction) {
     }
 }
 
+void respawnPontos() {
+    static clock_t lastRespawnTime = 0;
+    clock_t currentTime = clock();
+
+    // Reaparecer bolinhas a cada 3 segundos
+    if (((currentTime - lastRespawnTime) / CLOCKS_PER_SEC) < 3) return;
+    lastRespawnTime = currentTime;
+
+    // Escolher uma posição aleatória válida para adicionar uma bolinha
+    int posX, posY;
+    do {
+        posX = rand() % (COLS - 2) + 1;
+        posY = rand() % (ROWS - 2) + 1;
+    } while (maze[posY][posX] != ' '); // Certificar-se de que a posição está vazia
+
+    maze[posY][posX] = '.'; // Adicionar uma bolinha
+    screenGotoxy(offsetX + posX, offsetY + posY);
+    printf("\033[1;34m.\033[0m"); // Azul brilhante
+}
+
 int main() {
     int ch = 0;
 
@@ -281,20 +301,21 @@ int main() {
     initGhosts();
     drawMaze();
 
-    while (1) {
-        if (keyhit()) {
-            ch = readch();
-            movePacman(ch);
+   while (1) {
+     if (keyhit()) {
+         ch = readch();
+         movePacman(ch);
         }
 
-        moveGhosts();
+      moveGhosts();
+      respawnPontos();
 
-        if (isWin()) {
-            showGameOverScreen(1);
-            break;
+      if (isWin()) {
+         showGameOverScreen(1);
+         break;
         }
 
-        screenUpdate();
+      screenUpdate();
     }
 
     // Tela de fim de jogo
