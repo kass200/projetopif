@@ -83,9 +83,7 @@ void initGhosts() {
         } while (maze[posY][posX] == '#' || maze[posY][posX] == '|' || maze[posY][posX] == '_');
         ghosts[i] = (Ghost){posX, posY, rand() % 2 ? 1 : -1, rand() % 2 ? 1 : -1};
 
-        // Desenhar o fantasma com cor vermelha
-        screenGotoxy(offsetX + posX, offsetY + posY);
-        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
+        drawGhosts();
     }
 }
 
@@ -169,32 +167,6 @@ void loadLevel() {
     timerInit(50 / speedMultiplier);
 }
 
-int isWin() {
-    for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLS; j++) {
-            if (maze[i][j] == '.') return 0;
-        }
-    }
-    // Reposicionar bolinhas
-    for (int i = 1; i < ROWS - 1; i++) {
-      for (int j = 1; j < COLS - 1; j++) {
-         int isOccupied = (i == y && j == x);
-         for (int k = 0; k < numGhosts; k++) {
-             if (ghosts[k].x == j && ghosts[k].y == i) {
-                 isOccupied = 1;
-                 break;
-                }
-            }
-         if (!isOccupied && maze[i][j] == ' ') {
-             maze[i][j] = (rand() % 5 == 0) ? '.' : ' ';
-          }
-        }
-    }
-    score += 10; // Bônus por limpar o mapa
-    drawMaze();  // Atualizar labirinto
-    return 1;
-}
-
 // Desenha o placar
 void drawScore() {
     screenGotoxy(offsetX, offsetY + ROWS + 1);
@@ -204,7 +176,7 @@ void drawScore() {
         printf("Bom trabalho! Continue assim!");
     } else {
         screenGotoxy(offsetX, offsetY + ROWS + 2);
-        printf("                          "); // Apaga mensagem anterior
+        printf("                             "); // Apaga mensagem anterior
     }
     fflush(stdout);
 }
@@ -336,17 +308,6 @@ void respawnPontos() {
     }
 }
 
-
-// Função para verificar colisão entre Pac-Man e os fantasmas
-int checkCollision() {
-    for (int i = 0; i < numGhosts; i++) {
-        if (x == ghosts[i].x && y == ghosts[i].y) {
-            return 1; // Colisão detectada
-        }
-    }
-    return 0;
-}
-
 int main() {
     int ch = 0;
 
@@ -363,34 +324,20 @@ int main() {
     initGhosts();
     drawMaze();
 
-   while (1) {
-    // Verifica entrada do teclado
-    if (keyhit()) {
-        ch = readch();
-        movePacman(ch); // Move Pac-Man
+    while (1) {
+        // Verifica entrada do teclado
+        if (keyhit()) {
+            ch = readch();
+            movePacman(ch); // Move Pac-Man
+        }
+
+        // Atualiza fantasmas
+        moveGhosts();
+
+        // Respawna pontos após um intervalo
+        respawnPontos();
+
+        // Atualiza a tela
+        screenUpdate();
     }
-
-    // Atualiza fantasmas
-    moveGhosts();
-
-    // Respawna pontos após um intervalo
-    respawnPontos();
-
-    // Verifica condições de vitória ou derrota
-    if (isWin()) {
-        showGameOverScreen(1); // Venceu
-        break;
-    }
-
-    if (checkCollision()) {
-        showGameOverScreen(0); // Derrota
-        break;
-    }
-
-    // Atualiza a tela
-    screenUpdate();
-}
-
-
-       
 }
