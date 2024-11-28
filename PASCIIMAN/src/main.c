@@ -10,7 +10,7 @@
 #define MAX_LEVELS 5
 #define MAX_GHOSTS 5
 #define SCREEN_WIDTH 80  // Largura padrão do terminal
-#define SCREEN_HEIGHT 24 // Altura padrão do terminal
+#define SCREEN_HEIGHT 29 // Altura padrão do terminal
 
 // Declarações de funções
 void showGameOverScreen(int);
@@ -74,7 +74,7 @@ char levels[MAX_LEVELS][ROWS][COLS] = {
 // Função para calcular deslocamentos
 void calculateOffsets() {
     offsetX = (SCREEN_WIDTH - COLS) / 2;
-    offsetY = (SCREEN_HEIGHT - ROWS) / 2;
+    offsetY = 0;
 }
 
 // Inicializa os fantasmas
@@ -336,8 +336,10 @@ int main() {
 
     // Exibir tela inicial
     showStartScreen();
+    while (!readch()) { }
 
     // Carrega o labirinto
+    screenClear();
     loadLevel();
     initGhosts();
     drawMaze();
