@@ -96,7 +96,7 @@ void initGhosts() {
 void drawGhosts() {
     for (int i = 0; i < numGhosts; i++) {
         screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
+        printf("\033[1;31m☠\033[0m"); // ANSI para texto vermelho brilhante
     }
 }
 
