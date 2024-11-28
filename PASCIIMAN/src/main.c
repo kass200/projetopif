@@ -5,8 +5,8 @@
 #include "keyboard.h"
 #include "timer.h"
 
-#define ROWS 20
-#define COLS 40
+#define ROWS 22
+#define COLS 42
 #define MAX_LEVELS 5
 #define MAX_GHOSTS 5
 #define SCREEN_WIDTH 80  // Largura padrão do terminal
@@ -46,23 +46,28 @@ char maze[ROWS][COLS];
 // Labirinto
 char levels[MAX_LEVELS][ROWS][COLS] = {
     { 
-      "____________________________________",
-     "|###################################|",
-     "|O.............#....................|",
-     "|.#######.######.###########.######.|",
-     "|.#...............................#.|",
-     "|.#.########.###########.########.#.|",
-     "|.#........#.#...........#........#.|",
-     "|.#######...#..#########..#.#######.|",
-     "|............#.....##....#..........|",
-     "|..##............######..#......###.|",
-     "|#.#####.....#.....##..#......#..###|",
-     "|#.####..#####.........########.###.|",
-     "|..........########....#..##......##|",
-     "|.#.#......#.............#.......#.#|",
-     "|.#.##..####.#########.#.#######.#.#|",
-     "|.#........#.#...........#.......#.#|",
-     "|___________________________________|"
+        "_________________________________________",
+        "|########################################|",
+        "|O...........####..............#.........|",
+        "|.#####.####.#..#.######.#####.#.########|",
+        "|.#.....#....#..#......#.....#.#.........|",
+        "|.#.#####.####..####.#.#####.#.#########.|",
+        "|.#.#.....#....#....#.#.....#...........#|",
+        "|.#.#.#####.####.####.#####.##########..#|",
+        "|.#...#.......##..#.............#.......#|",
+        "|.#..###.#####.###.#########....#.#####.#|",
+        "|.#.....#.....#...#.........#....#.....#.|",
+        "|.#######.#####.#.#.#######.#####.#####.#|",
+        "|.#.............#.#.#.......#...........#|",
+        "|.#.#############.###.#######.#.#####.#.#|",
+        "|.#.#...........#.....#...#...#.....#.#.#|",
+        "|.#.#.#########.#######.#.#.#######.#.#.#|",
+        "|.#.#.........#.........#.#.......#.#.#.#|",
+        "|.#.#########.#.#########.#.#######.#.#.#|",
+        "|.#...........#...........#...........#.#|",
+        "|.############.########################.#|",
+        "|........................................|",
+        "|________________________________________|"
     }
 };
 
@@ -91,13 +96,13 @@ void initGhosts() {
 void drawGhosts() {
     for (int i = 0; i < numGhosts; i++) {
         screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-        printf("\033[1;31m👻\033[0m"); // ANSI para texto vermelho brilhante
+        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
     }
 }
 
 void moveGhosts() {
     ghostMoveCounter++;
-    if (ghostMoveCounter % 170000 != 0) return; // Reduz a frequência de movimento dos fantasmas
+    if (ghostMoveCounter % 150000 != 0) return; // Reduz a frequência de movimento dos fantasmas
 
     for (int i = 0; i < numGhosts; i++) {
         int newX = ghosts[i].x + ghosts[i].dirX;
@@ -162,7 +167,6 @@ void resetLevel() {
 // Carrega o nível atual
 void loadLevel() {
     memcpy(maze, levels[currentLevel], sizeof(levels[currentLevel]));
-    numGhosts = 2 + currentLevel;
     speedMultiplier = currentLevel + 1;
     timerInit(50 / speedMultiplier);
 }
@@ -171,7 +175,7 @@ void loadLevel() {
 void drawScore() {
     screenGotoxy(offsetX, offsetY + ROWS + 1);
     printf("Pontuação: %d   ", score);
-    if (score > 0 && score % 10 == 0) {
+    if (score > 0 && score % 10 == 0 || score > 0 && score % 10 == 1 || score > 0 && score % 10 == 2 || score > 0 && score % 10 == 3) {
         screenGotoxy(offsetX, offsetY + ROWS + 2);
         printf("Bom trabalho! Continue assim!");
     } else {
