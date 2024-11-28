@@ -112,7 +112,12 @@ void moveGhosts() {
         if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS && maze[newY][newX] != '#' && maze[newY][newX] != '_' && maze[newY][newX] != '|') {
             // Apagar a posição antiga
             screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-            printf(" ");
+            
+            if (maze[newY][newX] == '.'){
+                printf("\033[1;32m.\033[0m");
+            } else {
+                printf(" ");
+            }
 
             // Atualizar a posição
             ghosts[i].x = newX;
@@ -156,7 +161,7 @@ void moveGhosts() {
 
 // Função para reiniciar o nível
 void resetLevel() {
-    x = 1; y = 1;
+    x = 1; y = 2;
     score = 0;
     loadLevel();
     initGhosts();
@@ -267,9 +272,14 @@ void movePacman(char direction) {
         case 's': newY++; break;
         case 'a': newX--; break;
         case 'd': newX++; break;
+        case 'W': newY--; break;
+        case 'S': newY++; break;
+        case 'A': newX--; break;
+        case 'D': newX++; break;
         default: return;
     }
-     // Verifica se o novo movimento está dentro dos limites do labirinto
+
+    // Verifica se o novo movimento está dentro dos limites do labirinto
     if (newX >= 0 && newX < COLS && newY >= 0 && newY < ROWS) {
         // Verifica se a nova posição não é uma parede (nem #, nem |, nem )
         if (maze[newY][newX] != '#' && maze[newY][newX] != '|' && maze[newY][newX] != '_') {
@@ -322,7 +332,7 @@ void respawnPontos() {
     if (maze[posY][posX] == ' ') {
         maze[posY][posX] = '.';
         screenGotoxy(offsetX + posX, offsetY + posY);
-        printf("\033[1;34m.\033[0m");
+        printf("\033[1;32m.\033[0m");
     }
 }
 
