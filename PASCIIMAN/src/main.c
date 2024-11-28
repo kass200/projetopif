@@ -46,7 +46,7 @@ char maze[ROWS][COLS];
 // Labirinto
 char levels[MAX_LEVELS][ROWS][COLS] = {
     { 
-      "____________________________________",
+     "_____________________________________",
      "|###################################|",
      "|O.............#....................|",
      "|.#######.######.###########.######.|",
@@ -204,19 +204,37 @@ void drawMaze() {
     drawScore();
     drawGhosts();
 }
-// Tela inicial
+
 void showStartScreen() {
-    screenClear();
-    screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2 - 2);
-    printf("\033[1;34m===== PASCIIMAN =====\033[0m"); // Azul brilhante
-    screenGotoxy(SCREEN_WIDTH / 2 - 10, SCREEN_HEIGHT / 2);
-    printf("\033[1;32mPressione qualquer tecla para começar...\033[0m"); // Verde brilhante
-    fflush(stdout);
-    while (!keyhit());
-    readch();
-    screenClear();
-    screenUpdate();
+    screenClear(); 
+    printf("\n\n");
+    printf("  #############################################\n");
+    printf("  #                                           #\n");
+    printf("  #              PASCIIMAN GAME               #\n");
+    printf("  #                                           #\n");
+    printf("  #          Pressione qualquer tecla         #\n");
+    printf("  #               para começar!               #\n");
+    printf("  #############################################\n");
+    printf("\n");
+    printf("  Bem-vindo ao Pasciiman! Aqui estão as instruções:\n\n");
+    printf("  Movimentação:\n");
+    printf("    - Use as teclas W, A, S, D para mover o Pac-Man:\n");
+    printf("        W: Cima\n");
+    printf("        A: Esquerda\n");
+    printf("        S: Baixo\n");
+    printf("        D: Direita\n");
+    printf("\n");
+    printf("  Regras:\n");
+    printf("    - Colete o máximo de pontos (.) Possíveis.\n");
+    printf("    - Evite os fantasmas (G), ou será derrotado.\n");
+    printf("    - Pontos reaparecem periodicamente.\n");
+    printf("    - Use a estratégia para não ser pego!\n");
+
+    while (!keyhit()) { } 
+    readch(); 
+    screenClear(); 
 }
+
 
 // Tela de Game Over
 void showGameOverScreen(int won) {
@@ -318,7 +336,7 @@ int main() {
 
     // Exibir tela inicial
     showStartScreen();
-
+    
     // Carrega o labirinto
     loadLevel();
     initGhosts();
