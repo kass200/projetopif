@@ -26,7 +26,7 @@ int isWin();
 void movePacman(char);
 
 // Variáveis globais
-int x = 1, y = 1;
+int x = 1, y = 2;
 int score = 0;
 int currentLevel = 0;
 int numGhosts = 4;
@@ -46,9 +46,9 @@ char maze[ROWS][COLS];
 // Labirinto
 char levels[MAX_LEVELS][ROWS][COLS] = {
     { 
-      "___________________________________",
+      "____________________________________",
      "|###################################|",
-     "|P.............#....................|",
+     "|O.............#....................|",
      "|.#######.######.###########.######.|",
      "|.#...............................#.|",
      "|.#.########.###########.########.#.|",
@@ -91,7 +91,7 @@ void initGhosts() {
 void drawGhosts() {
     for (int i = 0; i < numGhosts; i++) {
         screenGotoxy(offsetX + ghosts[i].x, offsetY + ghosts[i].y);
-        printf("\033[1;31mG\033[0m"); // ANSI para texto vermelho brilhante
+        printf("\033[1;31m👻\033[0m"); // ANSI para texto vermelho brilhante
     }
 }
 
@@ -190,8 +190,8 @@ void drawMaze() {
                 printf("\033[1;34m#\033[0m"); // Azul brilhante para paredes
             } else if (maze[i][j] == '.') {
                 printf("\033[1;34m.\033[0m"); // Azul brilhante para pontos
-            } else if (maze[i][j] == 'P') {
-                printf("\033[1;33mP\033[0m"); // Amarelo brilhante para Pac-Man
+            } else if (maze[i][j] == 'O') {
+                printf("\033[1;33m●\033[0m"); // Amarelo brilhante para Pac-Man
             } else if (maze[i][j] == '_') {
                 printf("\033[1;34m_\033[0m"); // Azul brilhante para o limite inferior
             } else if (maze[i][j] == '|') {
@@ -265,7 +265,7 @@ void movePacman(char direction) {
 
             // Desenha o Pac-Man na nova posição
             screenGotoxy(offsetX + x, offsetY + y);
-            printf("\033[1;33mP\033[0m");
+            printf("\033[1;33m●\033[0m");
 
             if (maze[newY][newX] == '.') {
                 score += 1;
