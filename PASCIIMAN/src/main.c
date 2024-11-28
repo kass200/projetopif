@@ -229,10 +229,6 @@ void showStartScreen() {
     printf("    - Evite os fantasmas (G), ou será derrotado.\n");
     printf("    - Pontos reaparecem periodicamente.\n");
     printf("    - Use a estratégia para não ser pego!\n");
-
-    while (!keyhit()) { } 
-    readch(); 
-    screenClear(); 
 }
 
 
@@ -336,8 +332,10 @@ int main() {
 
     // Exibir tela inicial
     showStartScreen();
-    
+    while (!readch()) { }
+
     // Carrega o labirinto
+    screenClear();
     loadLevel();
     initGhosts();
     drawMaze();
