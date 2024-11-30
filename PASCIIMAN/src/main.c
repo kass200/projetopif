@@ -214,44 +214,65 @@ void drawMaze() {
     drawGhosts();
 }
 
-// Tela inicial
 void showStartScreen() {
-    screenClear(); 
-    printf("\n\n");
-    printf("  #############################################\n");
-    printf("  #                                           #\n");
-    printf("  #              PASCIIMAN GAME               #\n");
-    printf("  #                                           #\n");
-    printf("  #          Pressione qualquer tecla         #\n");
-    printf("  #               para começar!               #\n");
-    printf("  #############################################\n");
-    printf("\n");
-    printf("  Bem-vindo ao Pasciiman! Aqui estão as instruções:\n\n");
+    screenClear(); // Limpa a tela
+
+    // Adicionando cores e formatação
+    printf("\033[1;34m\n\n"); // Texto azul brilhante
+    printf("  ########################################################################################\n");
+    printf("  #                                                                                      #\n");
+    printf("  #\033[1;33m██████╗  █████╗  ███████╗██████╗██╗ ██╗███╗   ███╗ █████╗ ███╗   ███╗\033[1;34m#\n");
+    printf("  #\033[1;33m██╔══██╗██╔══██╗██╔════╝██╔════╝██║ ██║████╗ ████║██╔══██╗████╗ ████║\033[1;34m#\n");
+    printf("  #\033[1;33m██████╔╝███████║╚█████╗ ██║     ██║ ██║██╔████╔██║███████║██╔████╔██║\033[1;34m#\n");
+    printf("  #\033[1;33m██╔═══╝ ██╔══██║ ╚═══██╗██║     ██║ ██║██║╚██╔╝██║██╔══██║██║╚██╔╝██║\033[1;34m#\n");
+    printf("  #\033[1;33m██║     ██║  ██║██████╔╝╚██████ ██║ ██║██║ ╚═╝ ██║██║  ██║██║ ╚═╝ ██║\033[1;34m#\n");
+    printf("  #\033[1;33m╚═╝     ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═╝ ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝\033[1;34m#\n");
+    printf("  #                                                                                      #\n");
+    printf("  #                 \033[1;32mPressione qualquer tecla\033[1;34m                         #\n");
+    printf("  #                    \033[1;32mpara começar!\033[1;34m                                 #\n");
+    printf("  ########################################################################################\n");
+    printf("\n\033[0m"); // Restaura a cor padrão
+
+    printf("\033[1;36m  Bem-vindo ao Pasciiman! Aqui estão as instruções:\n\n");
     printf("  Movimentação:\n");
-    printf("    - Use as teclas W, A, S, D para mover o Pac-Man:\n");
-    printf("        W: Cima\n");
+    printf("    - Use as teclas \033[1;32mW, A, S, D\033[1;36m para mover o Pac-Man:\n");
+    printf("        \033[1;33mW: Cima\n");
     printf("        A: Esquerda\n");
     printf("        S: Baixo\n");
-    printf("        D: Direita\n");
+    printf("        D: Direita\n\033[0m");
     printf("\n");
-    printf("  Regras:\n");
-    printf("    - Colete o máximo de pontos (.) Possíveis.\n");
-    printf("    - Evite os fantasmas (G), ou será derrotado.\n");
+
+    printf("\033[1;36m  Regras:\n");
+    printf("    - Colete o máximo de pontos (\033[1;32m.\033[1;36m) possíveis.\n");
+    printf("    - Evite os fantasmas (\033[1;31mG\033[1;36m), ou será derrotado.\n");
     printf("    - Pontos reaparecem periodicamente.\n");
-    printf("    - Use a estratégia para não ser pego!\n");
+    printf("    - Use a estratégia para não ser pego!\033[0m\n");
+    printf("\n");
 }
+
 
 // Tela de Game Over
 void showGameOverScreen(int won) {
     screenClear();
+     printf("\033[1;31m"); // Cor vermelha brilhante
+    printf("  #############################################\n");
+    printf("  #                                           #\n");
     if (won) {
         printf("Parabéns! Você venceu!\n");
     } else {
-        printf("Game Over! Você foi pego por um fantasma!\n");
+        printf("  #         \033[1;31m ██████╗  █████╗ ███╗   ███╗███████╗   ██████╗ ██╗   ██╗███████╗██████╗\033[1;31m        #\n");
+        printf("  #         \033[1;31m██╔════╝ ██╔══██╗████╗ ████║██╔════╝  ██╔═══██╗██║   ██║██╔════╝██╔══██╗\033[1;31m        #\n");
+        printf("  #         \033[1;31m██║  ███╗███████║██╔████╔██║█████╗    ██║   ██║██║   ██║█████╗  █████╔╝\033[1;31m        #\n");
+        printf("  #         \033[1;31m██║   ██║██╔══██║██║╚██╔╝██║██╔══╝    ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔═██║ \033[1;31m        #\n");
+        printf("  #         \033[1;31m╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗  ╚██████╔╝ ║████╔╝ ███████╗██║  ██║\033[1;31m        #\n");
+        printf("  #         \033[1;31m ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝   ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝ \033[1;31m        #\n");
     }
+    printf("  #                                           #\n");
+    printf("  #############################################\n\033[0m");
     if (score > highScore) highScore = score;
-    printf("Pontuação: %d   Maior Pontuação: %d\n", score, highScore);
-    printf("Pressione 'R' para reiniciar ou qualquer outra tecla para sair...");
+    printf("\033[1;36m\n  Pontuação: \033[1;33m%d\033[1;36m   Maior Pontuação: \033[1;33m%d\033[0m\n", score, highScore);
+    printf("\033[1;37m\n  Pressione \033[1;32m'R'\033[1;37m para reiniciar ou qualquer outra tecla para sair...\033[0m\n");
+
     fflush(stdout);
     while (!keyhit());
     char choice = readch();
